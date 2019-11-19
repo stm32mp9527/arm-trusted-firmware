@@ -119,6 +119,9 @@ endif
 # Download load address for serial boot devices
 DWL_BUFFER_BASE 	?=	0xC7000000
 
+# Hypervisor mode
+BL33_HYP			?= 0
+
 # Device tree
 ifeq ($(STM32MP13),1)
 BL2_DTSI		:=	stm32mp13-bl2.dtsi
@@ -163,6 +166,7 @@ endif
 # Enable flags for C files
 $(eval $(call assert_booleans,\
 	$(sort \
+		BL33_HYP \
 		PKA_USE_BRAINPOOL_P256T1 \
 		PKA_USE_NIST_P256 \
 		STM32MP_CRYPTO_ROM_LIB \
@@ -185,6 +189,7 @@ $(eval $(call assert_numerics,\
 
 $(eval $(call add_defines,\
 	$(sort \
+		BL33_HYP \
 		DWL_BUFFER_BASE \
 		PKA_USE_BRAINPOOL_P256T1 \
 		PKA_USE_NIST_P256 \
