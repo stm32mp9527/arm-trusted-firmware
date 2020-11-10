@@ -80,6 +80,9 @@ endif
 PKA_USE_NIST_P256	?=	0
 PKA_USE_BRAINPOOL_P256T1 ?=	0
 
+# STM32 Secure Secret Provisioning mode (SSP)
+STM32MP_SSP		?=	0
+
 ifeq ($(AARCH32_SP),sp_min)
 # Disable Neon support: sp_min runtime may conflict with non-secure world
 TF_CFLAGS		+=	-mfloat-abi=soft
@@ -163,6 +166,7 @@ $(eval $(call assert_booleans,\
 		STM32MP_CRYPTO_ROM_LIB \
 		STM32MP_DDR_32BIT_INTERFACE \
 		STM32MP_DDR_DUAL_AXI_PORT \
+		STM32MP_SSP \
 		STM32MP_USE_EXTERNAL_HEAP \
 		STM32MP13 \
 		STM32MP15 \
@@ -193,6 +197,7 @@ $(eval $(call add_defines,\
 		STM32MP_CRYPTO_ROM_LIB \
 		STM32MP_DDR_32BIT_INTERFACE \
 		STM32MP_DDR_DUAL_AXI_PORT \
+		STM32MP_SSP \
 		STM32MP_USE_EXTERNAL_HEAP \
 		STM32MP13 \
 		STM32MP15 \
@@ -284,6 +289,10 @@ BL2_SOURCES		+=	plat/st/stm32mp1/plat_ddr.c
 
 BL2_SOURCES		+=	plat/st/stm32mp1/stm32mp1_critic_power.c
 BL2_SOURCES		+=	plat/st/stm32mp1/stm32mp1_critic_power_wrapper.S
+
+ifeq ($(STM32MP_SSP),1)
+include plat/st/stm32mp1/stm32mp1_ssp.mk
+endif
 
 ifeq ($(AARCH32_SP),sp_min)
 # Create DTB file for BL32
