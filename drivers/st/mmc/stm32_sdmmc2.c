@@ -129,7 +129,12 @@
 #define DT_SDMMC2_COMPAT		"st,stm32-sdmmc2"
 #endif
 
+#if STM32MP13 || STM32MP15
 #define SDMMC_FIFO_SIZE			64U
+#endif
+#if STM32MP25
+#define SDMMC_FIFO_SIZE			1024U
+#endif
 
 #define STM32MP_MMC_INIT_FREQ			U(400000)	/*400 KHz*/
 #define STM32MP_SD_NORMAL_SPEED_MAX_FREQ	U(25000000)	/*25 MHz*/
