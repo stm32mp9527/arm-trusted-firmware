@@ -18,6 +18,9 @@
 
 #include <platform_def.h>
 
+#define CORE_PWR_STATE(state) ((state)->pwr_domain_state[MPIDR_AFFLVL0])
+#define CLUSTER_PWR_STATE(state) ((state)->pwr_domain_state[MPIDR_AFFLVL1])
+
 #define CA35SS_SYSCFG_VBAR_CR	0x2084U
 
 static uintptr_t stm32_sec_entrypoint;
@@ -93,7 +96,45 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 static void __dead2 stm32_pwr_domain_pwr_down_wfi(const psci_power_state_t
 						  *target_state)
 {
-	ERROR("stm32mp2 Power Down WFI: operation not handled.\n");
+	u_register_t mpidr = read_mpidr();
+	unsigned int core_id = MPIDR_AFFLVL0_VAL(mpidr);
+
+	/* Core is no more running (stopped or suspended) */
+	stm32mp_state_set(core_id, STATE_RUNNING, false);
+
+	/* The first power down on core 0, core 1 is running */
+	if ((core_id == STM32MP_PRIMARY_CPU) &&
+	    !stm32mp_state_check(STM32MP_PRIMARY_CPU, STATE_START)) {
+		uintptr_t sec_entrypoint;
+
+		/* Core 0 can't be turned OFF, emulate it with a WFE loop */
+		VERBOSE("BL31: core0 entering wait loop...\n");
+		while (!stm32mp_state_check(STM32MP_PRIMARY_CPU, STATE_START)) {
+			wfe();
+		}
+
+		VERBOSE("BL31: core0 resumed.\n");
+		dsbsy();
+		sec_entrypoint = mmio_read_32(A35SSC_BASE + CA35SS_SYSCFG_VBAR_CR);
+		/* Jump manually to entry point, with mmu disabled. */
+		disable_mmu_el3();
+		((void(*)(void))sec_entrypoint)();
+
+		/* This shouldn't be reached */
+		panic();
+	}
+
+	if (psci_is_last_on_cpu_safe() &&
+	    stm32_get_stateid(target_state->pwr_domain_state) == PWRSTATE_STANDBY) {
+		/* Save the context when all the core are requested to stop */
+		stm32_pm_context_save(target_state);
+	}
+
+	/* Synchronize instruction flow before auto-reset from WFI */
+	isb();
+	psci_power_down_wfi();
+
+	/* This shouldn't be reached */
 	panic();
 }
 
@@ -111,7 +152,26 @@ static void __dead2 stm32_system_reset(void)
 static int stm32_validate_power_state(unsigned int power_state,
 				      psci_power_state_t *req_state)
 {
-	return PSCI_E_INVALID_PARAMS;
+	unsigned int pstate_pwrlvl = psci_get_pstate_pwrlvl(power_state);
+	unsigned int pstate_type = psci_get_pstate_type(power_state);
+	unsigned int pstate_id = psci_get_pstate_id(power_state);
+
+	if (pstate_pwrlvl > PLAT_MAX_PWR_LVL) {
+		return PSCI_E_INVALID_PARAMS;
+	}
+
+	if (pstate_type != 0U) {
+		return PSCI_E_INVALID_PARAMS;
+	}
+
+	if (pstate_id != 0U) {
+		return PSCI_E_INVALID_PARAMS;
+	}
+
+	CORE_PWR_STATE(req_state) = ARM_LOCAL_STATE_RET;
+	CLUSTER_PWR_STATE(req_state) = ARM_LOCAL_STATE_RUN;
+
+	return PSCI_E_SUCCESS;
 }
 
 static int stm32_validate_ns_entrypoint(uintptr_t entrypoint)
@@ -127,7 +187,21 @@ static int stm32_validate_ns_entrypoint(uintptr_t entrypoint)
 static int stm32_node_hw_state(u_register_t target_cpu,
 			       unsigned int power_level)
 {
-	return PSCI_E_INVALID_PARAMS;
+	/*
+	 * The format of 'power_level' is implementation-defined, but 0 must
+	 * mean a CPU. Only allow level 0.
+	 */
+	if (power_level != MPIDR_AFFLVL0) {
+		return PSCI_E_INVALID_PARAMS;
+	}
+
+	/*
+	 * From psci view the CPU 0 is always ON,
+	 * CPU 1 can be SUSPEND or RUNNING.
+	 * Therefore do not manage POWER OFF state and always return HW_ON.
+	 */
+
+	return (int)HW_ON;
 }
 
 static void stm32_get_sys_suspend_power_state(psci_power_state_t *req_state)
