@@ -133,6 +133,10 @@ ENCTOOL			?=	${ENCTOOLPATH}/encrypt_fw${BIN_EXT}
 FIPTOOLPATH		?=	tools/fiptool
 FIPTOOL			?=	${FIPTOOLPATH}/fiptool${BIN_EXT}
 
+# Variables for use with Firmware Update Metadata
+FWUMDTOOLPATH		?=	tools/fwu_gen_metadata/
+FWUMDTOOL		?=	${FWUMDTOOLPATH}/fwumd_tool.py
+
 # Variables for use with sptool
 SPTOOLPATH		?=	tools/sptool
 SPTOOL			?=	${SPTOOLPATH}/sptool.py
@@ -585,6 +589,14 @@ ifeq (${ENABLE_PAUTH}, 1)
 # arm/common/aarch64/arm_pauth.c contains a sample platform hook to complete the
 # Pauth support. As it's not secure, it must be reimplemented for real platforms
 	BL_COMMON_SOURCES	+=	lib/extensions/pauth/pauth_helpers.S
+endif
+
+################################################################################
+# PSA Firmware Update arguments definition
+################################################################################
+ifeq (${PSA_FWU_SUPPORT},1)
+FWUMD_ARGS += --nb-fw-imgs ${NR_OF_FW_BANKS}
+FWUMD_ARGS += --nb-banks ${NR_OF_IMAGES_IN_FW_BANK}
 endif
 
 ################################################################################
