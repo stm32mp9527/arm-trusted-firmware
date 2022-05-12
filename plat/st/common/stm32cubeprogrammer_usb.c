@@ -164,6 +164,7 @@ static const struct usb_dfu_media usb_dfu_fops = {
 };
 
 int stm32cubeprog_usb_load(struct usb_handle *usb_core_handle,
+			   uint8_t phase,
 			   uintptr_t base,
 			   size_t len)
 {
@@ -177,7 +178,7 @@ int stm32cubeprog_usb_load(struct usb_handle *usb_core_handle,
 		return -EIO;
 	}
 
-	dfu_state.phase = PHASE_SSBL;
+	dfu_state.phase = phase;
 	dfu_state.address = base;
 	dfu_state.base = base;
 	dfu_state.len = len;
