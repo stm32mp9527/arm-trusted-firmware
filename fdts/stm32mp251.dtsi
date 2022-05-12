@@ -285,6 +285,9 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 
+			uid_otp@14 {
+				reg = <0x14 0xc>;
+			};
 			part_number_otp: otp9@24 {
 				reg = <0x24 0x4>;
 			};
