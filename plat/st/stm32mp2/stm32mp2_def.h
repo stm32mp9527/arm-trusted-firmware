@@ -59,8 +59,30 @@
 #define STM32MP_SYSRAM_SIZE		U(0x00040000)
 #define SRAM1_BASE			U(0x0E040000)
 #define SRAM1_SIZE			U(0x00020000)
+#define SRAM2_BASE			U(0x0E060000)
+#define SRAM2_SIZE			U(0x00020000)
 #define STM32MP_BACKUP_RAM_BASE		U(0x42000000)
 
+#define STM32MP_SEC_SYSRAM_BASE		STM32MP_SYSRAM_BASE
+
+#if defined(IMAGE_BL2)
+#if STM32MP_USB_PROGRAMMER
+#define STM32MP_SEC_DEVICE_SYSRAM_SIZE		STM32MP_USB_DWC3_SIZE
+#define STM32MP_SEC_DEVICE_SYSRAM_BASE		(STM32MP_SYSRAM_BASE + \
+						 STM32MP_SYSRAM_SIZE - \
+						 STM32MP_SEC_DEVICE_SYSRAM_SIZE)
+
+#define STM32MP_SEC_SYSRAM_SIZE		(STM32MP_SYSRAM_SIZE - \
+					 STM32MP_SEC_DEVICE_SYSRAM_SIZE - \
+					 STM32MP_FW_CONFIG_MAX_SIZE)
+
+#define STM32MP_USB_DWC3_BASE		STM32MP_SEC_DEVICE_SYSRAM_BASE
+#define STM32MP_USB_DWC3_SIZE		PAGE_SIZE
+#else /* STM32MP_USB_PROGRAMMER */
+#define STM32MP_SEC_SYSRAM_SIZE		(STM32MP_SYSRAM_SIZE - \
+					 STM32MP_FW_CONFIG_MAX_SIZE)
+#endif /* STM32MP_USB_PROGRAMMER */
+#else /* IMAGE_BL2 */
 #define STM32MP_NS_SYSRAM_SIZE		PAGE_SIZE
 #define STM32MP_NS_SYSRAM_BASE		(STM32MP_SYSRAM_BASE + \
 					 STM32MP_SYSRAM_SIZE - \
@@ -69,9 +91,9 @@
 #define STM32MP_SCMI_NS_SHM_BASE	STM32MP_NS_SYSRAM_BASE
 #define STM32MP_SCMI_NS_SHM_SIZE	STM32MP_NS_SYSRAM_SIZE
 
-#define STM32MP_SEC_SYSRAM_BASE		STM32MP_SYSRAM_BASE
 #define STM32MP_SEC_SYSRAM_SIZE		(STM32MP_SYSRAM_SIZE - \
 					 STM32MP_NS_SYSRAM_SIZE)
+#endif
 
 /* DDR configuration */
 #define STM32MP_DDR_BASE		U(0x80000000)
@@ -130,7 +152,11 @@ enum ddr_type {
  * MAX_MMAP_REGIONS is usually:
  * BL stm32mp2_mmap size + mmap regions in *_plat_arch_setup
  */
+#if STM32MP_USB_PROGRAMMER
+#define MAX_MMAP_REGIONS			8
+#else
 #define MAX_MMAP_REGIONS			6
+#endif
 
 /* DTB initialization value */
 #define STM32MP_BL2_DTB_SIZE			U(0x00005000) /* 20 KB for DTB */
@@ -150,12 +176,19 @@ enum ddr_type {
 #define STM32MP_DDR_FW_MAX_SIZE		U(0x8800)
 #endif
 
+#define STM32MP_FW_CONFIG_MAX_SIZE	PAGE_SIZE
+#if STM32MP_USB_PROGRAMMER
+#define STM32MP_FW_CONFIG_BASE		(STM32MP_SEC_SYSRAM_BASE + \
+					 STM32MP_SEC_SYSRAM_SIZE - \
+					 STM32MP_FW_CONFIG_MAX_SIZE)
+#else
 #define STM32MP_FW_CONFIG_BASE		(STM32MP_SYSRAM_BASE + \
 					 STM32MP_SYSRAM_SIZE - \
-					 PAGE_SIZE)
-#define STM32MP_FW_CONFIG_MAX_SIZE	PAGE_SIZE
-#define STM32MP_BL33_BASE			(STM32MP_DDR_BASE + U(0x04000000))
-#define STM32MP_BL33_MAX_SIZE			U(0x400000)
+					 STM32MP_FW_CONFIG_MAX_SIZE)
+#endif
+
+#define STM32MP_BL33_BASE		(STM32MP_DDR_BASE + U(0x04000000))
+#define STM32MP_BL33_MAX_SIZE		U(0x400000)
 #define STM32MP_HW_CONFIG_BASE		(STM32MP_BL33_BASE + \
 					STM32MP_BL33_MAX_SIZE)
 #define STM32MP_HW_CONFIG_MAX_SIZE	U(0x20000)
@@ -346,6 +379,11 @@ static inline uintptr_t tamp_bkpr(uint32_t idx)
 	return TAMP_BKP_REGISTER_BASE + (idx << 2);
 }
 #endif
+
+/*******************************************************************************
+ * STM32MP2 USB
+ ******************************************************************************/
+#define USB_DWC3_BASE			U(0x48300000)
 
 /*******************************************************************************
  * STM32MP2 DDRCTRL
