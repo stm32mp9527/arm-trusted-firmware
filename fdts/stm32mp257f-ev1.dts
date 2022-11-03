@@ -34,3 +34,11 @@
 	pinctrl-0 = <&usart2_pins_a>;
 	status = "okay";
 };
+
+&sdmmc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc1_b4_pins_a>;
+	st,neg-edge;
+	bus-width = <4>;
+	status = "okay";
+};
