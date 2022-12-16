@@ -164,6 +164,11 @@ PLAT_BL_COMMON_SOURCES		+=	lib/cpus/${ARCH}/cortex_a35.S
 PLAT_BL_COMMON_SOURCES		+=	drivers/st/uart/${ARCH}/stm32_console.S
 PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/${ARCH}/stm32mp2_helper.S
 
+PLAT_BL_COMMON_SOURCES		+=	drivers/st/pmic/stm32mp_pmic2.c				\
+					drivers/st/pmic/stpmic2.c				\
+
+PLAT_BL_COMMON_SOURCES		+=	drivers/st/i2c/stm32_i2c.c
+
 PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/stm32mp2_private.c
 
 PLAT_BL_COMMON_SOURCES		+=	drivers/st/bsec/bsec3.c					\
@@ -180,7 +185,8 @@ BL2_SOURCES			+=	plat/st/stm32mp2/plat_bl2_mem_params_desc.c		\
 					plat/st/stm32mp2/stm32mp2_fconf_firewall.c
 
 BL2_SOURCES			+=	drivers/st/crypto/stm32_hash.c				\
-					plat/st/stm32mp2/bl2_plat_setup.c
+					plat/st/stm32mp2/bl2_plat_setup.c			\
+					plat/st/stm32mp2/plat_ddr.c
 
 BL2_SOURCES		+=	drivers/st/rif/stm32mp2_risaf.c
 
