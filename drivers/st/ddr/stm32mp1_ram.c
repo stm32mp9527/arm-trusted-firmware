@@ -91,7 +91,7 @@ static int stm32mp1_ddr_setup(void)
 
 	config.self_refresh = false;
 
-	if (stm32mp1_is_wakeup_from_standby()) {
+	if (stm32mp_is_wakeup_from_standby()) {
 		config.self_refresh = true;
 		config.zdata = stm32_get_zdata_from_context();
 	}

@@ -15,7 +15,6 @@ void stm32mp1_arch_security_setup(void);
 void stm32mp1_security_setup(void);
 
 bool stm32mp1_addr_inside_backupsram(uintptr_t addr);
-bool stm32mp1_is_wakeup_from_standby(void);
 
 void stm32mp1_syscfg_init(void);
 void stm32mp1_syscfg_enable_io_compensation_start(void);

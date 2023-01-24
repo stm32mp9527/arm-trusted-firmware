@@ -367,7 +367,7 @@ skip_console_init:
 
 	if (dt_pmic_status() > 0) {
 		initialize_pmic();
-		if (!stm32mp1_is_wakeup_from_standby() &&
+		if (!stm32mp_is_wakeup_from_standby() &&
 		    pmic_voltages_init() != 0) {
 			ERROR("PMIC voltages init failed\n");
 			panic();
@@ -429,7 +429,7 @@ static void prepare_encryption(void)
 
 	stm32_mce_init();
 
-	if (stm32mp1_is_wakeup_from_standby()) {
+	if (stm32mp_is_wakeup_from_standby()) {
 		stm32mp1_pm_get_mce_mkey_from_context(mkey);
 		stm32_mce_reload_configuration();
 	} else {
