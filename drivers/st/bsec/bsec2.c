@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2017-2023, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -578,23 +578,6 @@ uint32_t bsec_permanent_lock_otp(uint32_t otp)
 	}
 
 	return result;
-}
-
-/*
- * bsec_write_debug_conf: write value in debug feature.
- *	to enable/disable debug service.
- * val: value to write.
- * return value: none.
- */
-void bsec_write_debug_conf(uint32_t val)
-{
-	if (is_otp_invalid_mode()) {
-		return;
-	}
-
-	bsec_lock();
-	mmio_write_32(bsec_base + BSEC_DEN_OFF, val);
-	bsec_unlock();
 }
 
 /*
