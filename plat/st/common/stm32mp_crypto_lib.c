@@ -58,7 +58,8 @@ static void crypto_lib_init(void)
 		panic();
 	}
 
-	if (stm32mp_is_closed_device() || stm32mp_is_auth_supported()) {
+	if ((stm32mp_check_closed_device() == STM32MP_CHIP_SEC_CLOSED) ||
+	    stm32mp_is_auth_supported()) {
 #if STM32MP_CRYPTO_ROM_LIB
 		boot_context = (boot_api_context_t *)stm32mp_get_boot_ctx_address();
 		auth_ops.verify_signature = boot_context->bootrom_ecdsa_verify_signature;
@@ -322,7 +323,8 @@ static int crypto_verify_signature(void *data_ptr, unsigned int data_len,
 	size_t bignum_len = sizeof(sig) / 2U;
 	unsigned int seq_num = 0U;
 
-	if (!stm32mp_is_closed_device() && !stm32mp_is_auth_supported()) {
+	if ((stm32mp_check_closed_device() == STM32MP_CHIP_SEC_OPEN) &&
+	    !stm32mp_is_auth_supported()) {
 		return CRYPTO_SUCCESS;
 	}
 

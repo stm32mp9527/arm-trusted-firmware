@@ -14,6 +14,9 @@
 #define JEDEC_ST_BKID U(0x0)
 #define JEDEC_ST_MFID U(0x20)
 
+#define STM32MP_CHIP_SEC_CLOSED		U(0x34D9CCC5)
+#define STM32MP_CHIP_SEC_OPEN		U(0xA764D182)
+
 /* FWU configuration (max supported value is 15) */
 #define FWU_MAX_TRIAL_REBOOT		U(3)
 
@@ -26,8 +29,8 @@ uint32_t stm32mp_get_boot_action(void);
 #endif
 
 bool stm32mp_is_single_core(void);
-bool stm32mp_is_closed_device(void);
 bool stm32mp_is_auth_supported(void);
+uint32_t stm32mp_check_closed_device(void);
 
 /* Return the base address of the DDR controller */
 uintptr_t stm32mp_ddrctrl_base(void);
