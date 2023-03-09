@@ -138,11 +138,13 @@ static int uart_send_result(uint8_t byte)
 	return uart_write_8(byte);
 }
 
+#if !STM32MP_SSP
 static bool is_valid_header(fip_toc_header_t *header)
 {
 	return (header->name == TOC_HEADER_NAME) &&
 	       (header->serial_number != 0U);
 }
+#endif
 
 static int uart_receive_command(uint8_t *command)
 {
@@ -395,12 +397,15 @@ static int uart_start_cmd(uintptr_t buffer)
 		return 0;
 	}
 
+#if !STM32MP_SSP
 	if (!is_valid_header((fip_toc_header_t *)buffer)) {
 		STM32PROG_ERROR("FIP Header check failed %lx, for phase %u\n",
 				buffer, handle.phase);
 		return -EIO;
 	}
+
 	VERBOSE("FIP header looks OK.\n");
+#endif
 
 	return 0;
 }
