@@ -66,7 +66,6 @@
 		/* Disable authentication for development */
 		disable_auth = <0x0>;
 
-		/* Use SRAM2 to manage the mbedTLS heap */
 		mbedtls_heap_addr = <0x0 STM32MP_MBEDTLS_HEAP_BASE>;
 		mbedtls_heap_size = <STM32MP_MBEDTLS_HEAP_SIZE>;
 	};
