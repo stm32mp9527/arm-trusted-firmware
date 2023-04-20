@@ -10,6 +10,27 @@ For TF-A common configuration of STM32 MPUs, please check
 STM32MP2 Versions
 -----------------
 
+Here are the variants for STM32MP2:
+- STM32MP21
+- STM32MP25
+
+STM32MP21 Versions
+~~~~~~~~~~~~~~~~~~
+The STM32MP21 series is available in 3 different lines which are pin-to-pin compatible:
+
+- STM32MP215: Single Cortex-A35 + Cortex-M33 - 2x Ethernet - 2x CAN FD - CSI - LTDC
+- STM32MP213: Single Cortex-A35 + Cortex-M33 - 2x Ethernet - 2x CAN FD
+- STM32MP211: Single Cortex-A35 + Cortex-M33 - 1x Ethernet
+
+Each line comes with a security option (cryptography & secure boot) and a Cortex-A frequency option:
+
+- A      Basic + Cortex-A35 @ 1.2GHz
+- C      Secure Boot + HW Crypto + Cortex-A35 @ 1.2GHz
+- D      Basic + Cortex-A35 @ 1.5GHz
+- F      Secure Boot + HW Crypto + Cortex-A35 @ 1.5GHz
+
+STM32MP25 Versions
+~~~~~~~~~~~~~~~~~~
 The STM32MP25 series is available in 4 different lines which are pin-to-pin compatible:
 
 - STM32MP257: Dual Cortex-A35 cores, Cortex-M33 core - 3x Ethernet (2+1 switch) - 3x CAN FD – H264 - 3D GPU – AI / NN - LVDS
