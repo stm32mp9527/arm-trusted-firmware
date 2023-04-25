@@ -115,11 +115,13 @@
 /*******************************************************************************
  * PACKAGE ID
  ******************************************************************************/
+#if STM32MP25
 #define STM32MP25_PKG_CUSTOM		U(0)
 #define STM32MP25_PKG_AL_TBGA361	U(3)
 #define STM32MP25_PKG_AK_TBGA424	U(4)
 #define STM32MP25_PKG_AI_TBGA436	U(5)
 #define STM32MP25_PKG_UNKNOWN		U(7)
+#endif /* STM32MP25 */
 
 /*******************************************************************************
  * STM32MP2 memory map related constants
