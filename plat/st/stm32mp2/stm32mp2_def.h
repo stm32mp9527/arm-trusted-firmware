@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,11 +14,28 @@
 #include <drivers/st/stm32mp2_risaf.h>
 #endif
 #include <drivers/st/stm32mp2_pwr.h>
+#if STM32MP21
+#include <drivers/st/stm32mp21_rcc.h>
+#else /* STM32MP21 */
 #include <drivers/st/stm32mp25_rcc.h>
+#endif /* STM32MP21 */
+#if STM32MP21
+#include <dt-bindings/clock/st,stm32mp21-rcc.h>
+#include <dt-bindings/clock/stm32mp21-clksrc.h>
+#include <dt-bindings/reset/st,stm32mp21-rcc.h>
+#endif /* STM32MP21 */
+#if STM32MP23
 #include <dt-bindings/clock/stm32mp25-clks.h>
 #include <dt-bindings/clock/stm32mp25-clksrc.h>
-#include <dt-bindings/gpio/stm32-gpio.h>
 #include <dt-bindings/reset/stm32mp25-resets.h>
+#include <dt-bindings/soc/stm32mp23-rif.h>
+#endif /* STM32MP23 */
+#if STM32MP25
+#include <dt-bindings/clock/stm32mp25-clks.h>
+#include <dt-bindings/clock/stm32mp25-clksrc.h>
+#include <dt-bindings/reset/stm32mp25-resets.h>
+#endif /* STM32MP25 */
+#include <dt-bindings/gpio/stm32-gpio.h>
 #include <dt-bindings/soc/rif.h>
 
 #ifndef __ASSEMBLER__
