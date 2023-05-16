@@ -205,6 +205,32 @@ int stm32_get_otp_value_from_idx(const uint32_t otp_idx, uint32_t *otp_val)
 	return 0;
 }
 
+int stm32_lock_enc_key_otp(void)
+{
+	uint32_t otp_idx;
+	uint32_t otp_len;
+	uint32_t i;
+
+	if (stm32_get_otp_index(ENCKEY_OTP, &otp_idx, &otp_len) != 0) {
+		return -1;
+	}
+
+	for (i = 0U; i < otp_len / CHAR_BIT / sizeof(uint32_t); i++) {
+		uint32_t ret = bsec_write_otp(0U, otp_idx + i);
+
+		if (ret != BSEC_OK) {
+			return -1;
+		}
+
+		ret = bsec_set_sr_lock(otp_idx + i);
+		if (ret != BSEC_OK) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 #if  defined(IMAGE_BL2)
 static void reset_uart(uint32_t reset)
 {
