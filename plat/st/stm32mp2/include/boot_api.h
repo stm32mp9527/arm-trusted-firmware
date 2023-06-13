@@ -19,6 +19,53 @@
  */
 
 /*
+ * Possible value of boot context field 'boot_action'
+ */
+/* Boot action is Process Secure Boot */
+#define BOOT_API_CTX_BOOT_ACTION_SECURE_BOOT_PROCESS		0x04U
+/* Boot action is Process Wakeup from D1STANDBY or STANDBY */
+#define BOOT_API_CTX_BOOT_ACTION_WAKEUP_D1STANDBY_OR_STANDBY	0x05U
+/* Boot action is Process DEV_BOOT */
+#define BOOT_API_CTX_BOOT_ACTION_DEV_BOOT			0x06U
+
+#define BOOT_API_CTX_BOOT_ACTION_LOCAL_C1_RESET_PROCESS		0x0AU
+
+/*
+ * Possible value of boot context field 'wakeup_status'
+ */
+
+/* The boot reason is not a D1Standby Exit reason */
+#define BOOT_API_CTX_NO_D1STANDBY_NO_STANDBY_EXIT		0x00
+
+/*
+ * The boot reason is a D1Standby without previous Standby
+ * (VDDCORE was kept and SYSRAM content preserved)
+ * and the CPU1 is TDCID
+ */
+#define BOOT_API_CTX_D1STANDBY_EXIT_NO_STANDBY_CPU1_TDCID	0x01
+
+/*
+ * The boot reason is a D1Standby without previous Standby
+ * (VDDCORE was kept and SYSRAM content preserved)
+ * and the CPU1 is Not TDCID (ie CPU2 is TDCID)
+ */
+#define BOOT_API_CTX_D1STANDBY_EXIT_NO_STANDBY_CPU1_NOT_TDCID	0x02
+
+/*
+ * The boot reason is a D1Standby with previous Standby
+ * (VDDCORE was Off and SYSRAM content lost)
+ * and the CPU1 is TDCID
+ */
+#define BOOT_API_CTX_D1STANDBY_EXIT_STANDBY_CPU1_TDCID		0x03
+
+/*
+ * The boot reason is a D1Standby with previous Standby
+ * (VDDCORE was Off and SYSRAM content was lost)
+ * and the CPU1 is Not TDCID (ie CPU2 is TDCID)
+ */
+#define BOOT_API_CTX_D1STANDBY_EXIT_STANDBY_CPU1_NOT_TDCID	0x04
+
+/*
  * Possible value of boot context field 'auth_status'
  */
 /* No authentication done */
