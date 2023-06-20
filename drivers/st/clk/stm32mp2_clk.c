@@ -23,6 +23,11 @@
 #include <platform_def.h>
 #include "clk-stm32-core.h"
 
+#ifdef IMAGE_BL31
+uint32_t saved_pll_freq1_reg;
+uint32_t saved_pll_freq2_reg;
+#endif
+
 struct stm32_osci_dt_cfg {
 	unsigned long freq;
 	bool bypass;
@@ -1150,21 +1155,6 @@ enum clksrc_id {
 	CLKSRC_NB
 };
 
-#ifdef IMAGE_BL2
-static void stm32mp2_clk_muxsel_on_hsi(struct stm32_clk_priv *priv)
-{
-
-	mmio_clrbits_32(priv->base + RCC_MUXSELCFGR,
-			RCC_MUXSELCFGR_MUXSEL0_MASK |
-			RCC_MUXSELCFGR_MUXSEL1_MASK |
-			RCC_MUXSELCFGR_MUXSEL2_MASK |
-			RCC_MUXSELCFGR_MUXSEL3_MASK |
-			RCC_MUXSELCFGR_MUXSEL4_MASK |
-			RCC_MUXSELCFGR_MUXSEL5_MASK |
-			RCC_MUXSELCFGR_MUXSEL6_MASK |
-			RCC_MUXSELCFGR_MUXSEL7_MASK);
-}
-
 static void stm32mp2_a35_ss_on_hsi(void)
 {
 	uintptr_t a35_ss_address = A35SSC_BASE;
@@ -1192,6 +1182,21 @@ static void stm32mp2_a35_ss_on_hsi(void)
 	mmio_clrbits_32(pll_enable_reg, A35_SS_PLL_ENABLE_NRESET_SWPLL_FF);
 }
 
+#ifdef IMAGE_BL2
+static void stm32mp2_clk_muxsel_on_hsi(struct stm32_clk_priv *priv)
+{
+
+	mmio_clrbits_32(priv->base + RCC_MUXSELCFGR,
+			RCC_MUXSELCFGR_MUXSEL0_MASK |
+			RCC_MUXSELCFGR_MUXSEL1_MASK |
+			RCC_MUXSELCFGR_MUXSEL2_MASK |
+			RCC_MUXSELCFGR_MUXSEL3_MASK |
+			RCC_MUXSELCFGR_MUXSEL4_MASK |
+			RCC_MUXSELCFGR_MUXSEL5_MASK |
+			RCC_MUXSELCFGR_MUXSEL6_MASK |
+			RCC_MUXSELCFGR_MUXSEL7_MASK);
+}
+
 static void stm32mp2_clk_xbar_on_hsi(struct stm32_clk_priv *priv)
 {
 	uintptr_t xbar0cfgr = priv->base + RCC_XBAR0CFGR;
@@ -1203,6 +1208,7 @@ static void stm32mp2_clk_xbar_on_hsi(struct stm32_clk_priv *priv)
 				   XBAR_SRC_HSI);
 	}
 }
+#endif /* IMAGE_BL2 */
 
 /* TODO: MOVE THIS FUNCTION A35 ONLY */
 static int stm32mp2_a35_pll1_start(void)
@@ -1242,6 +1248,7 @@ static int stm32mp2_a35_pll1_start(void)
 	return 0;
 }
 
+#ifdef IMAGE_BL2
 static void stm32mp2_a35_pll1_config(uint32_t fbdiv, uint32_t refdiv, uint32_t postdiv1,
 				     uint32_t postdiv2)
 {
@@ -2191,4 +2198,45 @@ int stm32mp2_clk_init(void)
 #endif
 
 	return 0;
+}
+
+int stm32mp2_pll1_disable(void)
+{
+#ifdef IMAGE_BL2
+	return -EPERM;
+#else
+	const uintptr_t pll_freq1_reg = A35SSC_BASE + A35_SS_PLL_FREQ1;
+	const uintptr_t pll_freq2_reg = A35SSC_BASE + A35_SS_PLL_FREQ2;
+	const uintptr_t pll_enable_reg = A35SSC_BASE + A35_SS_PLL_ENABLE;
+
+	saved_pll_freq1_reg = mmio_read_32(pll_freq1_reg);
+	saved_pll_freq2_reg = mmio_read_32(pll_freq2_reg);
+
+	stm32mp2_a35_ss_on_hsi();
+
+	mmio_clrbits_32(pll_enable_reg, A35_SS_PLL_ENABLE_PD);
+
+	return 0;
+#endif
+}
+
+int stm32mp2_pll1_enable(void)
+{
+#ifdef IMAGE_BL2
+	return -EPERM;
+#else
+	int ret;
+	const uintptr_t pll_freq1_reg = A35SSC_BASE + A35_SS_PLL_FREQ1;
+	const uintptr_t pll_freq2_reg = A35SSC_BASE + A35_SS_PLL_FREQ2;
+
+	mmio_write_32(pll_freq1_reg, saved_pll_freq1_reg);
+	mmio_write_32(pll_freq2_reg, saved_pll_freq2_reg);
+
+	ret = stm32mp2_a35_pll1_start();
+	if (ret != 0) {
+		panic();
+	}
+
+	return 0;
+#endif
 }
