@@ -246,7 +246,7 @@ func console_stm32_core_flush
 	mov	r2, #USART_TIMEOUT
 txe_loop_3:
 	subs	r2, r2, #1
-	beq	plat_panic_handler
+	beq	1f
 	ldr	r1, [r0, #USART_ISR]
 	tst	r1, #USART_ISR_TXE
 	beq	txe_loop_3
