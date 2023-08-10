@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2023, Arm Limited and Contributors. All rights reserved.
  * Copyright (c) 2023, NVIDIA Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -387,6 +387,8 @@ int psci_set_suspend_mode(unsigned int mode);
 #endif
 void __dead2 psci_power_down_wfi(void);
 void psci_arch_setup(void);
+void psci_set_target_local_pwr_states(unsigned int end_pwrlvl,
+				      const psci_power_state_t *target_state);
 
 #endif /*__ASSEMBLER__*/
 
