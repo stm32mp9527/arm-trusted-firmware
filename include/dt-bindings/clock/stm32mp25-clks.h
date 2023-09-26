@@ -233,7 +233,6 @@
 #define CK_BUS_DDRCFG		210
 #define CK_BUS_GICV2M		211
 #define CK_BUS_USBTC		212
-#define CK_BUS_BUSPERFM		213
 #define CK_BUS_USB3PCIEPHY	214
 #define CK_BUS_STGEN		215
 #define CK_BUS_VDEC		216
@@ -272,7 +271,7 @@
 #define CK_BUS_RISAF4		249
 #define CK_BUS_USB2OHCI		250
 #define CK_BUS_USB2EHCI		251
-#define CK_BUS_USB3DRD		252
+#define CK_BUS_USB3DR		252
 #define CK_KER_LPTIM1		253
 #define CK_KER_LPTIM2		254
 #define CK_KER_USART2		255
@@ -453,7 +452,6 @@
 #define CK_SCMI_TIMG2		83
 #define CK_SCMI_BKPSRAM		84
 #define CK_SCMI_BSEC		85
-#define CK_SCMI_BUSPERFM	86
 #define CK_SCMI_ETR		87
 #define CK_SCMI_FMC		88
 #define CK_SCMI_GPIOA		89
