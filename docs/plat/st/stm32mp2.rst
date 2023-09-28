@@ -105,6 +105,8 @@ Dedicated STM32MP2 build flags:
   | Default: 1
 - | ``STM32MP_M33_TDCID``: Enable this flag if Cortex-A35 does not have the Trusted Domain Compartment ID (owned by Cortex-M33)
   | Default: 0
+- | ``STM32MP21``: to select STM32MP21 variant configuration.
+  | Default: 0
 - | ``STM32MP25``: to select STM32MP25 variant configuration.
   | Default: 1
 

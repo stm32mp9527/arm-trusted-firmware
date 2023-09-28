@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2018-2024 STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -132,7 +132,7 @@
 #if STM32MP13 || STM32MP15
 #define SDMMC_FIFO_SIZE			64U
 #endif
-#if STM32MP25
+#if STM32MP21 || STM32MP25
 #define SDMMC_FIFO_SIZE			1024U
 #endif
 

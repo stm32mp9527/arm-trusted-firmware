@@ -572,7 +572,7 @@ int stm32_get_boot_mode_cell(struct nvmem_cell *boot_mode)
 	return 0;
 }
 
-#if STM32MP25
+#if STM32MP21 || STM32MP25
 int stm32_get_stop2_entrypoint_cell(struct nvmem_cell *stop2_entrypoint)
 {
 	static bool initialized = false;
