@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -461,7 +461,9 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	/* Clear previous status */
 	mmio_setbits_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_CSSF);
 	mmio_setbits_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_CSSF);
+#if !STM32MP21
 	mmio_setbits_32(pwr_base + PWR_CPU3CR, PWR_CPU3CR_CSSF);
+#endif /* !STM32MP21 */
 
 	/* Enable the Non-secure interrupt to wake up the CPU with WFI for pending interrupt */
 	saved_scr_el3 = read_scr_el3();
@@ -1046,8 +1048,10 @@ static void stm32_pm_init(void)
 					   (1 << PWR_D2CR_LPLVDLY_D2_SHIFT) |
 					   (1 << PWR_D2CR_PODH_D2_SHIFT));
 
+#if !STM32MP21
 	/* System standby not set (D3) */
 	mmio_write_32(pwr_base + PWR_D3CR, 0U);
+#endif /* !STM32MP21 */
 
 	/* To confirmed: delay can be customizable or keep hardcoded at 1ms / 2ms */
 
