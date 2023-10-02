@@ -21,6 +21,7 @@
 #include <drivers/st/regulator_fixed.h>
 #include <drivers/st/stm32_console.h>
 #include <drivers/st/stm32_iwdg.h>
+#include <drivers/st/stm32_rifsc.h>
 #include <drivers/st/stm32_rng.h>
 #include <drivers/st/stm32mp_pmic2.h>
 #include <drivers/st/stm32mp_reset.h>
@@ -274,6 +275,10 @@ skip_console_init:
 		panic();
 	}
 #endif
+
+	if (stm32_rifsc_semaphore_init() != 0) {
+		panic();
+	}
 
 	if (stm32_rng_init() != 0) {
 		panic();
