@@ -103,6 +103,10 @@ uint32_t stm32_pm_get_optee_ep(void)
 
 void stm32_clean_context(void)
 {
+	if (!stm32mp_bkpram_get_access()) {
+		return;
+	}
+
 	clk_enable(BKPSRAM);
 
 	zeromem((void *)STM32MP_BACKUP_RAM_BASE, sizeof(struct backup_data_s));
@@ -114,6 +118,10 @@ void stm32_clean_context(void)
 void stm32_context_save_bl2_param(void)
 {
 	struct backup_data_s *backup_data;
+
+	if (!stm32mp_bkpram_get_access()) {
+		return;
+	}
 
 	clk_enable(BKPSRAM);
 
@@ -195,6 +203,10 @@ void stm32mp1_pm_save_mce_mkey_in_context(uint8_t *data)
 
 	backup_data = (struct backup_data_s *)STM32MP_BACKUP_RAM_BASE;
 
+	if (!stm32mp_bkpram_get_access()) {
+		return;
+	}
+
 	clk_enable(BKPSRAM);
 
 	memcpy(backup_data->mce_mkey, data, MCE_KEY_SIZE_IN_BYTES);
@@ -207,6 +219,11 @@ void stm32mp1_pm_get_mce_mkey_from_context(uint8_t *data)
 	struct backup_data_s *backup_data;
 
 	backup_data = (struct backup_data_s *)STM32MP_BACKUP_RAM_BASE;
+
+	if (!stm32mp_bkpram_get_access()) {
+		ERROR("DDR encryption key not available\n");
+		panic();
+	}
 
 	clk_enable(BKPSRAM);
 
@@ -221,6 +238,10 @@ void stm32mp1_pm_save_mce_region(uint32_t index, struct stm32_mce_region_s *conf
 
 	if (index >= MCE_IP_MAX_REGION_NB) {
 		panic();
+	}
+
+	if (!stm32mp_bkpram_get_access()) {
+		return;
 	}
 
 	backup_data = (struct backup_data_s *)STM32MP_BACKUP_RAM_BASE;
@@ -241,6 +262,11 @@ void stm32mp1_pm_get_mce_region(uint32_t index, struct stm32_mce_region_s *confi
 	}
 
 	backup_data = (struct backup_data_s *)STM32MP_BACKUP_RAM_BASE;
+
+	if (!stm32mp_bkpram_get_access()) {
+		ERROR("MCE region not available\n");
+		panic();
+	}
 
 	clk_enable(BKPSRAM);
 
