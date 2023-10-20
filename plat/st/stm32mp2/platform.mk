@@ -13,6 +13,7 @@ include plat/st/common/common.mk
 CRASH_REPORTING			:=	1
 ENABLE_PIE			:=	1
 PROGRAMMABLE_RESET_ADDRESS	:=	1
+BL2_IN_XIP_MEM			:=	1
 
 # Disable features unsupported in ARMv8.0
 ENABLE_SPE_FOR_NS		:= 0
