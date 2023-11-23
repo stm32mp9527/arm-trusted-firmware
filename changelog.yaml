@@ -1257,6 +1257,10 @@ subsections:
           - title: STM32MP2
             scope: stm32mp2-fdts
 
+            subsections:
+              - title: STM32MP25
+                scope: stm32mp25-fdts
+
       - title: PIE
         scope: pie
 
