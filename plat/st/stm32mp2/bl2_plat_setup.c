@@ -300,6 +300,9 @@ void bl2_el3_plat_arch_setup(void)
 
 	iac_dump();
 
+	/* Masking potential tamper during BL2 */
+	stm32mp2_syscfg_mask_potential_tamper_enable();
+
 	stm32mp_print_cpuinfo();
 
 	board_model = dt_get_board_model();
@@ -590,4 +593,7 @@ void bl2_el3_plat_prepare_exit(void)
 
 	stm32mp_io_exit();
 	stm32mp2_security_setup();
+
+	/* Unmask potential tamper before exit */
+	stm32mp2_syscfg_mask_potential_tamper_disable();
 }
