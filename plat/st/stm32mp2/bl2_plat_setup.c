@@ -401,7 +401,7 @@ skip_console_init:
 	}
 #endif
 
-#if STM32MP_DDR_FIP_IO_STORAGE
+#if STM32MP_DDR_FIP_IO_STORAGE && !STM32MP_UART_PROGRAMMER && !STM32MP_USB_PROGRAMMER
 	/* Skip DDR FW ID = the first image to load for standby exit */
 	if (stm32mp_is_wakeup_from_standby()) {
 		bl_mem_params_node_t *bl_mem_params;
@@ -420,6 +420,11 @@ static void prepare_encryption(void)
 #if !STM32MP_M33_TDCID
 	uint8_t mkey[RISAF_KEY_SIZE_IN_BYTES];
 
+#if STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER
+	if (stm32_rng_read(mkey, RISAF_KEY_SIZE_IN_BYTES) != 0) {
+		panic();
+	}
+#else /* STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER */
 	if (stm32mp_is_wakeup_from_standby()) {
 		stm32mp_pm_get_enc_mkey_from_context(mkey);
 	} else {
@@ -430,6 +435,7 @@ static void prepare_encryption(void)
 
 		stm32mp_pm_save_enc_mkey_in_context(mkey);
 	}
+#endif /* STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER */
 
 	if (stm32mp2_risaf_write_encryption_key(RISAF4_INST, mkey) != 0) {
 		panic();
@@ -475,7 +481,11 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 				FW_CONFIG_ID);
 		fconf_populate("FW_CONFIG", STM32MP_FW_CONFIG_BASE);
 
+#if STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER
+		wakeup_standby = false;
+#else /* STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER */
 		wakeup_standby = stm32mp_is_wakeup_from_standby();
+#endif /* STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER */
 
 		/* Iterate through all the fw config IDs */
 		for (i = 0U; i < ARRAY_SIZE(image_ids); i++) {
