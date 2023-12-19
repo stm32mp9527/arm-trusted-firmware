@@ -535,8 +535,10 @@ void stm32mp_syscfg_set_icn_qos(void)
 	/* Enable BW regulator */
 	mmio_write_32(SYSCFG_BASE + SYSCFG_ICNE2EBWRCR, U(0x00000051));
 
+#if !STM32MP21
 	/* Disable GPU BW limiter */
 	mmio_write_32(SYSCFG_BASE + SYSCFG_ICNGPUBWLCR, U(0x00004009));
+#endif /* !STM32MP21 */
 
 #if STM32MP_DDR4_TYPE || STM32MP_LPDDR4_TYPE
 	/* Change value of CPU BW limiter */
