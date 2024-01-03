@@ -37,13 +37,13 @@
 #define _RISAF_SR_ENCDIS		BIT(2)
 /* _RISAF_HWCFGR register fields */
 #define _RISAF_HWCFGR_CFG1_SHIFT	0
-#define _RISAF_HWCFGR_CFG1_MASK		GENMASK_32(7, 0)
+#define _RISAF_HWCFGR_CFG1_MASK		GENMASK_32(7, _RISAF_HWCFGR_CFG1_SHIFT)
 #define _RISAF_HWCFGR_CFG2_SHIFT	8
-#define _RISAF_HWCFGR_CFG2_MASK		GENMASK_32(15, 8)
+#define _RISAF_HWCFGR_CFG2_MASK		GENMASK_32(15, _RISAF_HWCFGR_CFG2_SHIFT)
 #define _RISAF_HWCFGR_CFG3_SHIFT	16
-#define _RISAF_HWCFGR_CFG3_MASK		GENMASK_32(23, 16)
+#define _RISAF_HWCFGR_CFG3_MASK		GENMASK_32(23, _RISAF_HWCFGR_CFG3_SHIFT)
 #define _RISAF_HWCFGR_CFG4_SHIFT	24
-#define _RISAF_HWCFGR_CFG4_MASK		GENMASK_32(31, 24)
+#define _RISAF_HWCFGR_CFG4_MASK		GENMASK_32(31, _RISAF_HWCFGR_CFG4_SHIFT)
 
 /* RISAF region registers (base relative) */
 #define _RISAF_REG_BASE			U(0x40)
@@ -64,8 +64,13 @@
 #define _RISAF_REG_CFGR_BREN		BIT(_RISAF_REG_CFGR_BREN_SHIFT)
 #define _RISAF_REG_CFGR_SEC_SHIFT	8
 #define _RISAF_REG_CFGR_SEC		BIT(_RISAF_REG_CFGR_SEC_SHIFT)
+#if STM32MP21
+#define _RISAF_REG_CFGR_ENC_SHIFT	14
+#define _RISAF_REG_CFGR_ENC		GENMASK_32(15, _RISAF_REG_CFGR_ENC_SHIFT)
+#else /* STM32MP21 */
 #define _RISAF_REG_CFGR_ENC_SHIFT	15
 #define _RISAF_REG_CFGR_ENC		BIT(_RISAF_REG_CFGR_ENC_SHIFT)
+#endif /* STM32MP21 */
 #define _RISAF_REG_CFGR_PRIVC_SHIFT	16
 #define _RISAF_REG_CFGR_PRIVC_MASK	GENMASK_32(23, 16)
 #define _RISAF_REG_CFGR_ALL_MASK	(_RISAF_REG_CFGR_BREN | _RISAF_REG_CFGR_SEC | \
@@ -78,21 +83,39 @@
 #define _RISAF_REG_CIDCFGR_ALL_MASK		(_RISAF_REG_CIDCFGR_RDENC_MASK | \
 						 _RISAF_REG_CIDCFGR_WRENC_MASK)
 
+#if STM32MP21
+/* RISAF MCE extension registers */
+#define _RISAF_XCR			U(0x1C00)
+#define _RISAF_XSR			U(0x1C04)
+#define _RISAF_MKEYR			U(0x1E00)
+
+/* RISAF MCE extension register field description */
+/* _RISAF_XCR register fields */
+#define _RISAF_XCR_XLOCK		BIT(0)
+#define _RISAF_XCR_MKLOCK		BIT(0)
+#define _RISAF_XCR_CIPHERSEL_SHIFT	4
+#define _RISAF_XCR_CIPHERSEL_MASK	GENMASK_32(5, _RISAF_XCR_CIPHERSEL_SHIFT)
+#define _RISAF_XCR_CIPHERSEL_AES128	1
+#define _RISAF_XCR_CIPHERSEL_AES256	3
+/* _RISAF_XSR register fields */
+#define _RISAF_XSR_MKVALID		BIT(0)
+#endif /* STM32MP21 */
+
 /* Device Tree related definitions */
 #define DT_RISAF_COMPAT			"st,stm32-risaf"
 #define DT_RISAF_REG_ID_MASK		U(0xF)
-#define DT_RISAF_EN_SHIFT		5
+#define DT_RISAF_EN_SHIFT		4
 #define DT_RISAF_EN_MASK		BIT(DT_RISAF_EN_SHIFT)
-#define DT_RISAF_SEC_SHIFT		6
+#define DT_RISAF_SEC_SHIFT		5
 #define DT_RISAF_SEC_MASK		BIT(DT_RISAF_SEC_SHIFT)
-#define DT_RISAF_ENC_SHIFT		7
-#define DT_RISAF_ENC_MASK		BIT(DT_RISAF_ENC_SHIFT)
+#define DT_RISAF_ENC_SHIFT		6
+#define DT_RISAF_ENC_MASK		GENMASK_32(7, DT_RISAF_ENC_SHIFT)
 #define DT_RISAF_PRIV_SHIFT		8
-#define DT_RISAF_PRIV_MASK		GENMASK_32(15, 8)
+#define DT_RISAF_PRIV_MASK		GENMASK_32(15, DT_RISAF_PRIV_SHIFT)
 #define DT_RISAF_READ_SHIFT		16
-#define DT_RISAF_READ_MASK		GENMASK_32(23, 16)
+#define DT_RISAF_READ_MASK		GENMASK_32(23, DT_RISAF_READ_SHIFT)
 #define DT_RISAF_WRITE_SHIFT		24
-#define DT_RISAF_WRITE_MASK		GENMASK_32(31, 24)
+#define DT_RISAF_WRITE_MASK		GENMASK_32(31, DT_RISAF_WRITE_SHIFT)
 
 /* RISAF max properties */
 #define RISAF_REGION_REG_SIZE		(4 * sizeof(uint32_t))
@@ -269,7 +292,7 @@ static int risaf_configure_region(int instance, uint32_t region_id, uint32_t cfg
 	mmio_clrsetbits_32(base + _RISAF_REG_CFGR(region_id),
 			   _RISAF_REG_CFGR_ALL_MASK, cfg & _RISAF_REG_CFGR_ALL_MASK);
 
-	if ((cfg & _RISAF_REG_CFGR_ENC) == _RISAF_REG_CFGR_ENC) {
+	if ((cfg & _RISAF_REG_CFGR_ENC) != 0U) {
 		if (!risaf_is_hw_encryption_functional(instance)) {
 			ERROR("RISAF%d: encryption feature error\n", instance + 1);
 			return -EIO;
@@ -318,8 +341,13 @@ static void risaf_conf_protreg(void)
 			       _RISAF_REG_CFGR_BREN_SHIFT) |
 			      (((value & DT_RISAF_SEC_MASK) >> DT_RISAF_SEC_SHIFT) <<
 			       _RISAF_REG_CFGR_SEC_SHIFT) |
+#if STM32MP21
 			      (((value & DT_RISAF_ENC_MASK) >> DT_RISAF_ENC_SHIFT) <<
 			       _RISAF_REG_CFGR_ENC_SHIFT) |
+#else /* !STM32MP21 */
+			      (((value & DT_RISAF_ENC_MASK) >> (DT_RISAF_ENC_SHIFT + 1)) <<
+			       _RISAF_REG_CFGR_ENC_SHIFT) |
+#endif /* STM32MP21 */
 			      (((value & DT_RISAF_PRIV_MASK) >> DT_RISAF_PRIV_SHIFT) <<
 			       _RISAF_REG_CFGR_PRIVC_SHIFT);
 
@@ -543,11 +571,9 @@ int stm32mp2_risaf_write_encryption_key(int instance, uint8_t *key)
 	uint32_t i;
 	uintptr_t base = stm32mp2_risaf.base[instance];
 
-	if (base == 0U) {
-		return -EINVAL;
-	}
+	assert(key != NULL);
 
-	if (key == NULL) {
+	if (base == 0U) {
 		return -EINVAL;
 	}
 
@@ -570,6 +596,95 @@ int stm32mp2_risaf_write_encryption_key(int instance, uint8_t *key)
 
 	return 0;
 }
+
+#if STM32MP21
+static int risaf_get_mce_key_size(int instance, uint32_t *size)
+{
+	struct dt_node_info risaf_info;
+	int node = -1;
+	void *fdt;
+
+	if (fdt_get_address(&fdt) == 0) {
+		return -ENOENT;
+	}
+
+	for (node = risaf_get_dt_node(&risaf_info, node); node >= 0;
+	     node = risaf_get_dt_node(&risaf_info, node)) {
+		int idx;
+		const fdt32_t *cuint = NULL;
+
+		idx = stm32_risaf_get_instance(risaf_info.base);
+		if (idx != instance) {
+			continue;
+		}
+
+		cuint = fdt_getprop(fdt, node, "st,mce-keysize-bits", NULL);
+		if (cuint == NULL) {
+			/* Property not set, affect default value */
+			*size = RISAF_MCE_KEY_128BITS_SIZE_IN_BYTES;
+		} else {
+			*size = (uint32_t)fdt32_to_cpu(*cuint) / 8;
+		}
+
+		return 0;
+	}
+
+	return -ENODEV;
+}
+
+/*
+ * @brief  Write the MCE key for a given instance.
+ * @param  instance: RISAF instance ID.
+ *         key: Pointer to the MCE key buffer.
+ *         size: MCE key size in bytes.
+ * @retval 0 if OK, negative value else.
+ */
+int stm32mp2_risaf_write_mce_key(int instance, uint8_t *key)
+{
+	uint64_t timeout_ref;
+	uint32_t i;
+	uint32_t size;
+	uintptr_t base = stm32mp2_risaf.base[instance];
+
+	assert(key != NULL);
+
+	if (base == 0U) {
+		return -EINVAL;
+	}
+
+	if (risaf_get_mce_key_size(instance, &size) != 0) {
+		return -EINVAL;
+	}
+
+	if (size == RISAF_MCE_KEY_128BITS_SIZE_IN_BYTES) {
+		mmio_write_32(base + _RISAF_XCR,
+			      _RISAF_XCR_CIPHERSEL_AES128 << _RISAF_XCR_CIPHERSEL_SHIFT);
+	} else if (size == RISAF_MCE_KEY_256BITS_SIZE_IN_BYTES) {
+		mmio_write_32(base + _RISAF_XCR,
+			      _RISAF_XCR_CIPHERSEL_AES256 << _RISAF_XCR_CIPHERSEL_SHIFT);
+	} else {
+		return -EINVAL;
+	}
+
+	for (i = 0U; i < size; i += sizeof(uint32_t)) {
+		uint32_t key_val = 0U;
+
+		memcpy(&key_val, key + i, sizeof(uint32_t));
+
+		mmio_write_32(base + _RISAF_MKEYR + i, key_val);
+	}
+
+	timeout_ref = timeout_init_us(RISAF_TIMEOUT_1MS_IN_US);
+
+	while (((mmio_read_32(base + _RISAF_XSR) & _RISAF_XSR_MKVALID) != _RISAF_XSR_MKVALID)) {
+		if (timeout_elapsed(timeout_ref)) {
+			return -EIO;
+		}
+	}
+
+	return 0;
+}
+#endif /* STM32MP21 */
 
 /*
  * @brief  Lock the RISAF IP registers for a given instance.
