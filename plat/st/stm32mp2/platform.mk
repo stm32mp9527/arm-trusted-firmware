@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023, STMicroelectronics - All Rights Reserved
+# Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -14,6 +14,7 @@ CRASH_REPORTING			:=	1
 ENABLE_PIE			:=	1
 PROGRAMMABLE_RESET_ADDRESS	:=	1
 BL2_IN_XIP_MEM			:=	1
+INIT_UNUSED_NS_EL2		:=	1
 
 # Disable features unsupported in ARMv8.0
 ENABLE_SPE_FOR_NS		:= 0
