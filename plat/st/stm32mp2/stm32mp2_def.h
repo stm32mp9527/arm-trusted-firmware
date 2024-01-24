@@ -13,10 +13,11 @@
 #include <drivers/st/stm32mp2_clk.h>
 #include <drivers/st/stm32mp2_risaf.h>
 #endif
-#include <drivers/st/stm32mp2_pwr.h>
 #if STM32MP21
+#include <drivers/st/stm32mp21_pwr.h>
 #include <drivers/st/stm32mp21_rcc.h>
 #else /* STM32MP21 */
+#include <drivers/st/stm32mp2_pwr.h>
 #include <drivers/st/stm32mp25_rcc.h>
 #endif /* STM32MP21 */
 #if STM32MP21
