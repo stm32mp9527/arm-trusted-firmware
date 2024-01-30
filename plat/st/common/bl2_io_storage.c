@@ -921,6 +921,8 @@ static int plat_set_image_source(unsigned int image_id,
 	io_block_spec_t *spec __maybe_unused;
 	const partition_entry_t *entry __maybe_unused;
 	const uint16_t boot_itf = stm32mp_get_boot_itf_selected();
+	const struct efi_guid metadata_type_guid __maybe_unused = FWU_METADATA_GUID;
+	uuid_t metadata_type_uuid __maybe_unused;
 
 	policy = &policies[image_id];
 	spec = (io_block_spec_t *)policy->image_spec;
@@ -929,17 +931,20 @@ static int plat_set_image_source(unsigned int image_id,
 #if (STM32MP_SDMMC || STM32MP_EMMC)
 	case BOOT_API_CTX_BOOT_INTERFACE_SEL_FLASH_SD:
 	case BOOT_API_CTX_BOOT_INTERFACE_SEL_FLASH_EMMC:
+		guidcpy(&metadata_type_uuid, &metadata_type_guid);
 		partition_init(GPT_IMAGE_ID);
 
-		if (image_id == FWU_METADATA_IMAGE_ID) {
-			entry = get_partition_entry(METADATA_PART_1);
-		} else {
-			entry = get_partition_entry(METADATA_PART_2);
-		}
-
+		entry = get_partition_entry_by_type(&metadata_type_uuid);
 		if (entry == NULL) {
-			ERROR("Unable to find a metadata partition\n");
-			return -ENOENT;
+			entry = (image_id == FWU_METADATA_IMAGE_ID) ?
+				get_partition_entry(METADATA_PART_1) :
+				get_partition_entry(METADATA_PART_2);
+
+
+			if (entry == NULL) {
+				ERROR("Unable to find a metadata partition\n");
+				return -ENOENT;
+			}
 		}
 
 		spec->offset = entry->start;
