@@ -620,7 +620,11 @@ enum ddr_type {
 #define RISAF_MAX_REGION			(RISAF1_MAX_REGION + RISAF2_MAX_REGION + \
 						 RISAF4_MAX_REGION + RISAF5_MAX_REGION)
 
+#if STM32MP21
+#define RISAF_KEY_SIZE_IN_BYTES			RISAF_MCE_KEY_256BITS_SIZE_IN_BYTES
+#else /* STM32MP21 */
 #define RISAF_KEY_SIZE_IN_BYTES			RISAF_ENCRYPTION_KEY_SIZE_IN_BYTES
+#endif /* STM32MP21 */
 #define RISAF_SEED_SIZE_IN_BYTES		U(4)
 
 /*******************************************************************************
