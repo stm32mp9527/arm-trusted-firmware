@@ -31,20 +31,33 @@ GICV2_INTR_NUM			:=	416
 DTB_FILE_NAME			?=	stm32mp257f-ev1.dtb
 
 STM32MP21			?=	0
+STM32MP23			?=	0
 STM32MP25			?=	1
 STM32MP_M33_TDCID		?=	0
 
 ifeq ($(STM32MP21),1)
 STM32MP21			:=	1
+STM32MP23			:=	0
+STM32MP25			:=	0
+else ifeq ($(STM32MP23),1)
+STM32MP21			:=	0
+STM32MP23			:=	1
 STM32MP25			:=	0
 else ifeq ($(STM32MP25),1)
 STM32MP21			:=	0
+STM32MP23			:=	0
 STM32MP25			:=	1
 else ifneq ($(findstring stm32mp21,$(DTB_FILE_NAME)),)
 STM32MP21			:=	1
+STM32MP23			:=	0
+STM32MP25			:=	0
+else ifneq ($(findstring stm32mp23,$(DTB_FILE_NAME)),)
+STM32MP21			:=	0
+STM32MP23			:=	1
 STM32MP25			:=	0
 else ifneq ($(findstring stm32mp25,$(DTB_FILE_NAME)),)
 STM32MP21			:=	0
+STM32MP23			:=	0
 STM32MP25			:=	1
 endif
 
@@ -162,6 +175,7 @@ $(eval $(call assert_booleans,\
 		STM32MP_M33_TDCID \
 		STM32MP_USE_EXTERNAL_HEAP \
 		STM32MP21 \
+		STM32MP23 \
 		STM32MP25 \
 )))
 
@@ -193,6 +207,7 @@ $(eval $(call add_defines,\
 		STM32MP_M33_TDCID \
 		STM32MP_USE_EXTERNAL_HEAP \
 		STM32MP21 \
+		STM32MP23 \
 		STM32MP25 \
 )))
 

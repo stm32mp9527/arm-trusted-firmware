@@ -33,7 +33,7 @@
 #if STM32MP13 || STM32MP15
 #include <drivers/st/stm32_qspi.h>
 #endif
-#if STM32MP21 || STM32MP25
+#if STM32MP21 || STM32MP23 || STM32MP25
 #include <drivers/st/stm32_ospi.h>
 #endif
 #include <drivers/st/stm32_sdmmc2.h>
@@ -326,7 +326,7 @@ static void boot_spi_nor(boot_api_context_t *boot_context)
 #if STM32MP13 || STM32MP15
 	io_result = stm32_qspi_init();
 #endif
-#if STM32MP21 || STM32MP25
+#if STM32MP21 || STM32MP23 || STM32MP25
 	io_result = stm32_ospi_init();
 #endif
 
@@ -372,7 +372,7 @@ static void boot_spi_nand(boot_api_context_t *boot_context)
 #if STM32MP13 || STM32MP15
 	io_result = stm32_qspi_init();
 #endif
-#if STM32MP21 || STM32MP25
+#if STM32MP21 || STM32MP23 || STM32MP25
 	io_result = stm32_ospi_init();
 #endif
 	assert(io_result == 0);

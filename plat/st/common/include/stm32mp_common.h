@@ -183,7 +183,7 @@ int stm32_get_magic_number_cell(struct nvmem_cell *magic_number);
 int stm32_get_core1_branch_address_cell(struct nvmem_cell *core1_branch_address);
 #endif
 
-#if STM32MP21 || STM32MP25
+#if STM32MP21 || STM32MP23 || STM32MP25
 int stm32_get_stop2_entrypoint_cell(struct nvmem_cell *stop2_entrypoint);
 #endif
 

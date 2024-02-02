@@ -107,6 +107,8 @@ Dedicated STM32MP2 build flags:
   | Default: 0
 - | ``STM32MP21``: to select STM32MP21 variant configuration.
   | Default: 0
+- | ``STM32MP23``: to select STM32MP23 variant configuration.
+  | Default: 0
 - | ``STM32MP25``: to select STM32MP25 variant configuration.
   | Default: 1
 
