@@ -69,7 +69,11 @@
 #define STM32MP257D_PART_NB	U(0xC0002E00)
 #define STM32MP257F_PART_NB	U(0x80002000)
 
+#if STM32MP21
+#define STM32MP2_REV_A		U(0x0000)
+#else /* STM32MP21 */
 #define STM32MP2_REV_A		U(0x1000)
+#endif /* STM32MP21 */
 #define STM32MP2_REV_B		U(0x2000)
 
 /*******************************************************************************
