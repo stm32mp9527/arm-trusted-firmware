@@ -274,6 +274,44 @@ void stm32mp_get_soc_name(char name[STM32_SOC_NAME_SIZE])
 		cpu_s = "215F";
 		break;
 #endif /* STM32MP21 */
+#if STM32MP23
+	case STM32MP231A_PART_NB:
+		cpu_s = "231A";
+		break;
+	case STM32MP231C_PART_NB:
+		cpu_s = "231C";
+		break;
+	case STM32MP231D_PART_NB:
+		cpu_s = "231D";
+		break;
+	case STM32MP231F_PART_NB:
+		cpu_s = "231F";
+		break;
+	case STM32MP233A_PART_NB:
+		cpu_s = "233A";
+		break;
+	case STM32MP233C_PART_NB:
+		cpu_s = "233C";
+		break;
+	case STM32MP233D_PART_NB:
+		cpu_s = "233D";
+		break;
+	case STM32MP233F_PART_NB:
+		cpu_s = "233F";
+		break;
+	case STM32MP235A_PART_NB:
+		cpu_s = "235A";
+		break;
+	case STM32MP235C_PART_NB:
+		cpu_s = "235C";
+		break;
+	case STM32MP235D_PART_NB:
+		cpu_s = "235D";
+		break;
+	case STM32MP235F_PART_NB:
+		cpu_s = "235F";
+		break;
+#endif /* STM32MP23 */
 #if STM32MP25
 	case STM32MP251A_PART_NB:
 		cpu_s = "251A";
@@ -395,10 +433,18 @@ bool stm32mp_is_single_core(void)
 	bool single_core = false;
 
 	switch (get_part_number()) {
+#if STM32MP23
+	case STM32MP231A_PART_NB:
+	case STM32MP231C_PART_NB:
+	case STM32MP231D_PART_NB:
+	case STM32MP231F_PART_NB:
+#endif /* STM32MP23 */
+#if STM32MP25
 	case STM32MP251A_PART_NB:
 	case STM32MP251C_PART_NB:
 	case STM32MP251D_PART_NB:
 	case STM32MP251F_PART_NB:
+#endif /* STM32MP25 */
 		single_core = true;
 		break;
 	default:
@@ -453,6 +499,14 @@ bool stm32mp_is_auth_supported(void)
 	case STM32MP215C_PART_NB:
 	case STM32MP215F_PART_NB:
 #endif /* STM32MP21 */
+#if STM32MP23
+	case STM32MP231C_PART_NB:
+	case STM32MP231F_PART_NB:
+	case STM32MP233C_PART_NB:
+	case STM32MP233F_PART_NB:
+	case STM32MP235C_PART_NB:
+	case STM32MP235F_PART_NB:
+#endif /* STM32MP23 */
 #if STM32MP25
 	case STM32MP251C_PART_NB:
 	case STM32MP251F_PART_NB:
