@@ -81,6 +81,9 @@ endif #STM32MP_M33_TDCID
 ifeq ($(STM32MP21),1)
 BL2_DTSI			:=	stm32mp21-bl2.dtsi
 BL31_DTSI			:=	stm32mp21-bl31.dtsi
+else ifeq ($(STM32MP23),1)
+BL2_DTSI			:=	stm32mp23-bl2.dtsi
+BL31_DTSI			:=	stm32mp23-bl31.dtsi
 else ifeq ($(STM32MP25),1)
 BL2_DTSI			:=	stm32mp25-bl2.dtsi
 BL31_DTSI			:=	stm32mp25-bl31.dtsi
