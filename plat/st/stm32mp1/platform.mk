@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023, Arm Limited and Contributors. All rights reserved.
+# Copyright (c) 2015-2024, Arm Limited and Contributors. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -95,9 +95,11 @@ WORKAROUND_CVE_2022_23960:=	0
 ifeq ($(STM32MP13),1)
 STM32_HASH_VER		:=	4
 STM32_RNG_VER		:=	4
+STM32_SAES_VER		:=	48 # 0x30
 else # Assuming STM32MP15
 STM32_HASH_VER		:=	2
 STM32_RNG_VER		:=	2
+STM32_SAES_VER		:=	0 # Unavailable in this platform
 endif
 
 # Download load address for serial boot devices
@@ -179,6 +181,7 @@ $(eval $(call assert_numerics,\
 		STM32_HASH_VER \
 		STM32_HEADER_VERSION_MAJOR \
 		STM32_RNG_VER \
+		STM32_SAES_VER \
 		STM32_TF_A_COPIES \
 )))
 
@@ -193,6 +196,7 @@ $(eval $(call add_defines,\
 		STM32_HASH_VER \
 		STM32_HEADER_VERSION_MAJOR \
 		STM32_RNG_VER \
+		STM32_SAES_VER \
 		STM32_TF_A_COPIES \
 		STM32MP_CRYPTO_ROM_LIB \
 		STM32MP_DDR_32BIT_INTERFACE \

@@ -82,6 +82,7 @@ PKA_USE_BRAINPOOL_P256T1 	?=	0
 
 STM32_HASH_VER			:=	4
 STM32_RNG_VER			:=	4
+STM32_SAES_VER			:=	50 # 0x32
 
 # Set load address for serial boot devices
 DWL_BUFFER_BASE 		?=	0x87000000
@@ -184,6 +185,7 @@ $(eval $(call assert_numerics,\
 		PLAT_PARTITION_MAX_ENTRIES \
 		STM32_HASH_VER \
 		STM32_RNG_VER \
+		STM32_SAES_VER \
 		STM32_TF_A_COPIES \
 )))
 
@@ -197,6 +199,7 @@ $(eval $(call add_defines,\
 		PLAT_TBBR_IMG_DEF \
 		STM32_HASH_VER \
 		STM32_RNG_VER \
+		STM32_SAES_VER \
 		STM32_TF_A_COPIES \
 		STM32MP_CRYPTO_ROM_LIB \
 		STM32MP_DDR_DUAL_AXI_PORT \
