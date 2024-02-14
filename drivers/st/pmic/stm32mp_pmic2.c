@@ -535,6 +535,9 @@ void initialize_pmic(void)
 	int ret;
 	uint8_t val;
 
+	if (dt_pmic_status() <= 0) {
+		return;
+	}
 	ret = initialize_pmic_i2c();
 	if (!ret) {
 		VERBOSE("No PMIC2\n");

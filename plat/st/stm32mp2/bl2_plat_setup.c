@@ -565,9 +565,7 @@ skip_console_init:
 		panic();
 	}
 
-	if (dt_pmic_status() > 0) {
-		initialize_pmic();
-	}
+	initialize_pmic();
 
 	fconf_populate("TB_FW", STM32MP_DTB_BASE);
 
