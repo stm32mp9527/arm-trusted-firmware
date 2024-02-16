@@ -6,7 +6,7 @@
 
 # Extra partitions used to find FIP, contains:
 # metadata (2) and fsbl-m (2) and the FIP partitions (default is 2).
-STM32_EXTRA_PARTS	:=	6
+STM32_EXTRA_PARTS		:=	6
 
 include plat/st/common/common.mk
 
@@ -17,15 +17,15 @@ BL2_IN_XIP_MEM			:=	1
 INIT_UNUSED_NS_EL2		:=	1
 
 # Disable features unsupported in ARMv8.0
-ENABLE_SPE_FOR_NS		:= 0
-ENABLE_SVE_FOR_NS		:= 0
+ENABLE_SPE_FOR_NS		:=	0
+ENABLE_SVE_FOR_NS		:=	0
 
 # Enable PSCI v1.0 extended state ID format
-PSCI_EXTENDED_STATE_ID		:= 1
-PSCI_OS_INIT_MODE		:= 1
+PSCI_EXTENDED_STATE_ID		:= 	1
+PSCI_OS_INIT_MODE		:= 	1
 
 # Reduce the number of interruption in GIC context
-GICV2_INTR_NUM		:=	416
+GICV2_INTR_NUM			:=	416
 
 # Default Device tree
 DTB_FILE_NAME			?=	stm32mp257f-ev1.dtb
@@ -33,40 +33,40 @@ DTB_FILE_NAME			?=	stm32mp257f-ev1.dtb
 STM32MP25			:=	1
 STM32MP_M33_TDCID		?=	0
 
-STM32MP_USE_EXTERNAL_HEAP :=	1
+STM32MP_USE_EXTERNAL_HEAP 	:=	1
 
 ifeq (${TRUSTED_BOARD_BOOT},1)
 # PKA algo to include
-PKA_USE_NIST_P256	:=	1
-PKA_USE_BRAINPOOL_P256T1:=	1
+PKA_USE_NIST_P256		:=	1
+PKA_USE_BRAINPOOL_P256T1	:=	1
 endif
 
 # STM32 image header version v2.2
 STM32_HEADER_VERSION_MAJOR	:=	2
 STM32_HEADER_VERSION_MINOR	:=	2
 
-PKA_USE_NIST_P256	?=	0
-PKA_USE_BRAINPOOL_P256T1 ?=	0
+PKA_USE_NIST_P256		?=	0
+PKA_USE_BRAINPOOL_P256T1 	?=	0
 
-STM32_HASH_VER		:=	4
-STM32_RNG_VER		:=	4
+STM32_HASH_VER			:=	4
+STM32_RNG_VER			:=	4
 
-# Download load address for serial boot devices
-DWL_BUFFER_BASE 	?=	0x87000000
+# Set load address for serial boot devices
+DWL_BUFFER_BASE 		?=	0x87000000
 
 # DDR types
-STM32MP_DDR3_TYPE	?=	0
-STM32MP_DDR4_TYPE	?=	0
-STM32MP_LPDDR4_TYPE	?=	0
+STM32MP_DDR3_TYPE		?=	0
+STM32MP_DDR4_TYPE		?=	0
+STM32MP_LPDDR4_TYPE		?=	0
 ifeq ($(STM32MP_M33_TDCID),0)
 ifeq (${STM32MP_DDR3_TYPE},1)
-DDR_TYPE		:=	ddr3
+DDR_TYPE			:=	ddr3
 endif
 ifeq (${STM32MP_DDR4_TYPE},1)
-DDR_TYPE		:=	ddr4
+DDR_TYPE			:=	ddr4
 endif
 ifeq (${STM32MP_LPDDR4_TYPE},1)
-DDR_TYPE		:=	lpddr4
+DDR_TYPE			:=	lpddr4
 endif
 
 # DDR features
@@ -84,10 +84,10 @@ BL31_DTSI			:=	stm32mp25-bl31.dtsi
 FDT_SOURCES			+=	$(addprefix ${BUILD_PLAT}/fdts/, $(patsubst %.dtb,%-bl31.dts,$(DTB_FILE_NAME)))
 
 ifneq (,$(wildcard fdts/$(patsubst %.dtb,%.dts,$(DTB_FILE_NAME))))
-DT_SOURCE_PATH		:=	fdts
+DT_SOURCE_PATH			:=	fdts
 else
 ifneq (,$(wildcard $(TFA_EXTERNAL_DT)/$(patsubst %.dtb,%.dts,$(DTB_FILE_NAME))))
-DT_SOURCE_PATH		:=	$(TFA_EXTERNAL_DT)
+DT_SOURCE_PATH			:=	$(TFA_EXTERNAL_DT)
 else
 $(error Cannot find $(patsubst %.dtb,%.dts,$(DTB_FILE_NAME)) file)
 endif
@@ -98,15 +98,15 @@ STM32_TF_STM32			:=	$(addprefix ${BUILD_PLAT}/tf-a-, $(patsubst %.dtb,%.stm32,$(
 STM32_LD_FILE			:=	plat/st/stm32mp2/${ARCH}/stm32mp2.ld.S
 STM32_BINARY_MAPPING		:=	plat/st/stm32mp2/${ARCH}/stm32mp2.S
 
-STM32MP_FW_CONFIG_NAME	:=	$(patsubst %.dtb,%-fw-config.dtb,$(DTB_FILE_NAME))
-STM32MP_FW_CONFIG	:=	${BUILD_PLAT}/fdts/$(STM32MP_FW_CONFIG_NAME)
-STM32MP_SOC_FW_CONFIG	:=	$(addprefix ${BUILD_PLAT}/fdts/, $(patsubst %.dtb,%-bl31.dtb,$(DTB_FILE_NAME)))
+STM32MP_FW_CONFIG_NAME		:=	$(patsubst %.dtb,%-fw-config.dtb,$(DTB_FILE_NAME))
+STM32MP_FW_CONFIG		:=	${BUILD_PLAT}/fdts/$(STM32MP_FW_CONFIG_NAME)
+STM32MP_SOC_FW_CONFIG		:=	$(addprefix ${BUILD_PLAT}/fdts/, $(patsubst %.dtb,%-bl31.dtb,$(DTB_FILE_NAME)))
 ifeq (${STM32MP_DDR_FIP_IO_STORAGE},1)
-STM32MP_DDR_FW_PATH	?=	drivers/st/ddr/phy/firmware/bin/stm32mp2
-STM32MP_DDR_FW_NAME	:=	${DDR_TYPE}_pmu_train.bin
-STM32MP_DDR_FW		:=	${STM32MP_DDR_FW_PATH}/${STM32MP_DDR_FW_NAME}
+STM32MP_DDR_FW_PATH		?=	drivers/st/ddr/phy/firmware/bin/stm32mp2
+STM32MP_DDR_FW_NAME		:=	${DDR_TYPE}_pmu_train.bin
+STM32MP_DDR_FW			:=	${STM32MP_DDR_FW_PATH}/${STM32MP_DDR_FW_NAME}
 endif
-FDT_SOURCES		+=	$(addprefix $(DT_SOURCE_PATH)/, $(patsubst %.dtb,%.dts,$(STM32MP_FW_CONFIG_NAME)))
+FDT_SOURCES			+=	$(addprefix $(DT_SOURCE_PATH)/, $(patsubst %.dtb,%.dts,$(STM32MP_FW_CONFIG_NAME)))
 # Add the FW_CONFIG to FIP and specify the same to certtool
 $(eval $(call TOOL_ADD_PAYLOAD,${STM32MP_FW_CONFIG},--fw-config))
 # Add the SOC_FW_CONFIG to FIP and specify the same to certtool
@@ -116,7 +116,7 @@ ifeq (${STM32MP_DDR_FIP_IO_STORAGE},1)
 $(eval $(call TOOL_ADD_IMG,STM32MP_DDR_FW,--ddr-fw))
 endif
 ifeq ($(GENERATE_COT),1)
-STM32MP_CFG_CERT	:=	$(BUILD_PLAT)/stm32mp_cfg_cert.crt
+STM32MP_CFG_CERT		:=	$(BUILD_PLAT)/stm32mp_cfg_cert.crt
 # Add the STM32MP_CFG_CERT to FIP and specify the same to certtool
 $(eval $(call TOOL_ADD_PAYLOAD,${STM32MP_CFG_CERT},--stm32mp-cfg-cert))
 endif
@@ -199,28 +199,28 @@ PLAT_BL_COMMON_SOURCES		+=	drivers/st/iwdg/stm32_iwdg.c				\
 					plat/st/stm32mp2/stm32mp2_pwr.c				\
 					plat/st/stm32mp2/stm32mp2_syscfg.c
 
-PLAT_BL_COMMON_SOURCES	+=	drivers/st/clk/clk-stm32-core.c				\
-				drivers/st/clk/stm32mp2_clk.c				\
-				drivers/st/crypto/stm32_rng.c				\
-				drivers/st/crypto/stm32_saes.c
+PLAT_BL_COMMON_SOURCES		+=	drivers/st/clk/clk-stm32-core.c				\
+					drivers/st/clk/stm32mp2_clk.c				\
+					drivers/st/crypto/stm32_rng.c				\
+					drivers/st/crypto/stm32_saes.c
 
 PLAT_BL_COMMON_SOURCES  	+=	drivers/st/nvmem/stm32mp_tamp_nvram_mp2.c
 
-BL2_SOURCES		+=	plat/st/stm32mp2/plat_bl2_mem_params_desc.c
+BL2_SOURCES			+=	plat/st/stm32mp2/plat_bl2_mem_params_desc.c
 
 BL2_SOURCES			+=	drivers/st/crypto/stm32_hash.c				\
 					plat/st/stm32mp2/bl2_plat_setup.c			\
 					plat/st/stm32mp2/plat_ddr.c
 
-BL2_SOURCES		+=	drivers/st/rif/stm32_rifsc.c
+BL2_SOURCES			+=	drivers/st/rif/stm32_rifsc.c
 
 ifeq ($(STM32MP_M33_TDCID),0)
-BL2_SOURCES		+=	drivers/st/rif/stm32mp2_risaf.c
+BL2_SOURCES			+=	drivers/st/rif/stm32mp2_risaf.c
 endif
 
 
 ifeq (${TRUSTED_BOARD_BOOT},1)
-BL2_SOURCES		+=	drivers/st/crypto/stm32_pka.c
+BL2_SOURCES			+=	drivers/st/crypto/stm32_pka.c
 endif
 
 ifneq ($(filter 1,${STM32MP_EMMC} ${STM32MP_SDMMC}),)
@@ -299,12 +299,12 @@ BL31_SOURCES			+=	${GICV2_SOURCES}					\
 					plat/common/plat_gicv2.c				\
 					plat/st/common/stm32mp_gic.c
 
-BL31_SOURCES		+=	plat/st/common/stm32mp_svc_setup.c			\
-				plat/st/stm32mp2/services/stgen_svc.c			\
-				plat/st/stm32mp2/services/stm32mp2_svc_setup.c
+BL31_SOURCES			+=	plat/st/common/stm32mp_svc_setup.c			\
+					plat/st/stm32mp2/services/stgen_svc.c			\
+					plat/st/stm32mp2/services/stm32mp2_svc_setup.c
 
 # Arm Archtecture services
-BL31_SOURCES		+=	services/arm_arch_svc/arm_arch_svc_setup.c
+BL31_SOURCES			+=	services/arm_arch_svc/arm_arch_svc_setup.c
 
 # Compilation rules
 .SUFFIXES:
@@ -327,8 +327,8 @@ endif #STM32MP_M33_TDCID
 ifeq (${STM32MP_DDR_FIP_IO_STORAGE},1)
 ifneq ($(filter 1,${STM32MP_UART_PROGRAMMER} ${STM32MP_USB_PROGRAMMER}),)
 
-STM32MP_DDR_FW_COPY	:=	${STM32MP_DDR_FW}
-DDR_FIP_NAME		?=	fip-ddr.bin
+STM32MP_DDR_FW_COPY		:=	${STM32MP_DDR_FW}
+DDR_FIP_NAME			?=	fip-ddr.bin
 
 $(eval $(call TOOL_ADD_IMG,STM32MP_DDR_FW_COPY,--ddr-fw,DDR_))
 
