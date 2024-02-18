@@ -30,11 +30,16 @@ include ${MAKE_HELPERS_DIRECTORY}build_env.mk
 ################################################################################
 
 include ${MAKE_HELPERS_DIRECTORY}defaults.mk
+include ${MAKE_HELPERS_DIRECTORY}plat_helpers.mk
+
+# To be able to set platform specific defaults
+ifneq ($(PLAT_DEFAULTS_MAKEFILE_FULL),)
+include ${PLAT_DEFAULTS_MAKEFILE_FULL}
+endif
 
 # Assertions enabled for DEBUG builds by default
 ENABLE_ASSERTIONS		:= ${DEBUG}
 ENABLE_PMF			:= ${ENABLE_RUNTIME_INSTRUMENTATION}
-PLAT				:= ${DEFAULT_PLAT}
 
 ################################################################################
 # Checkpatch script options
@@ -455,7 +460,6 @@ include common/backtrace/backtrace.mk
 ################################################################################
 # Generic definitions
 ################################################################################
-include ${MAKE_HELPERS_DIRECTORY}plat_helpers.mk
 
 ifeq (${BUILD_BASE},)
      BUILD_BASE		:=	./build
