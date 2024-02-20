@@ -45,7 +45,6 @@ ifeq (${PSA_FWU_SUPPORT},1)
 NR_OF_FW_BANKS			:=	2
 NR_OF_IMAGES_IN_FW_BANK		:=	1
 JSON_METADATA			?=	plat/st/common/default_metadata.json
-STM32_DEPS			+=	${BUILD_PLAT}/metadata.bin
 
 $(eval $(call GEN_METADATA,${JSON_METADATA},${BUILD_PLAT}/metadata.bin))
 
