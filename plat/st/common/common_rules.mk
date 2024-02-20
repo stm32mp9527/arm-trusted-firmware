@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023, STMicroelectronics - All Rights Reserved
+# Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -82,3 +82,8 @@ tf-a-%.stm32: tf-a-%.bin ${STM32_DEPS}
 		-n ${STM32_HEADER_VERSION_MINOR} \
 		-b ${STM32_HEADER_BL2_BINARY_TYPE}
 	@echo
+
+ifeq (${PSA_FWU_SUPPORT},1)
+.PHONY: metadata
+metadata: ${BUILD_PLAT}/metadata.bin
+endif
