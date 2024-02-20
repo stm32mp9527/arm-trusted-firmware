@@ -148,7 +148,7 @@
 #define STM32MP_SEC_SYSRAM_BASE		STM32MP_SYSRAM_BASE
 
 #if defined(IMAGE_BL2)
-#if STM32MP_USB_PROGRAMMER
+#if STM32MP_USB_PROGRAMMER && !STM32MP21
 #define STM32MP_SEC_DEVICE_SYSRAM_SIZE		STM32MP_USB_DWC3_SIZE
 #define STM32MP_SEC_DEVICE_SYSRAM_BASE		(STM32MP_SYSRAM_BASE + \
 						 STM32MP_SYSRAM_SIZE - \
@@ -159,9 +159,9 @@
 
 #define STM32MP_USB_DWC3_BASE		STM32MP_SEC_DEVICE_SYSRAM_BASE
 #define STM32MP_USB_DWC3_SIZE		PAGE_SIZE
-#else /* STM32MP_USB_PROGRAMMER */
+#else /* STM32MP_USB_PROGRAMMER && !STM32MP21 */
 #define STM32MP_SEC_SYSRAM_SIZE		STM32MP_SYSRAM_SIZE
-#endif /* STM32MP_USB_PROGRAMMER */
+#endif /* STM32MP_USB_PROGRAMMER && !STM32MP21 */
 #else /* IMAGE_BL2 */
 #define STM32MP_NS_SYSRAM_SIZE		PAGE_SIZE
 #define STM32MP_NS_SYSRAM_BASE		(STM32MP_SYSRAM_BASE + \
@@ -539,7 +539,11 @@ enum ddr_type {
 /*******************************************************************************
  * STM32MP2 USB
  ******************************************************************************/
+#if STM32MP21
+#define USB_OTG_BASE			U(0x48300000)
+#else /* STM32MP21 */
 #define USB_DWC3_BASE			U(0x48300000)
+#endif /* STM32MP21 */
 
 /*******************************************************************************
  * STM32MP2 DDRCTRL
