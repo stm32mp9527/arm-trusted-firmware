@@ -25,6 +25,7 @@
 #include <dt-bindings/clock/st,stm32mp21-rcc.h>
 #include <dt-bindings/clock/stm32mp21-clksrc.h>
 #include <dt-bindings/reset/st,stm32mp21-rcc.h>
+#include <dt-bindings/soc/stm32mp21-rif.h>
 #endif /* STM32MP21 */
 #if STM32MP23
 #include <dt-bindings/clock/stm32mp25-clks.h>
