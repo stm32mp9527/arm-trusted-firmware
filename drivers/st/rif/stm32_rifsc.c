@@ -17,9 +17,21 @@
 #include <platform_def.h>
 
 static unsigned long rifsc_semaphores[] = {
+#if STM32MP21
+	STM32MP21_RIFSC_RNG2_ID,
+	STM32MP21_RIFSC_PKA_ID,
+	STM32MP21_RIFSC_SAES_ID,
+#endif /* STM32MP21 */
+#if STM32MP23
+	STM32MP23_RIFSC_RNG_ID,
+	STM32MP23_RIFSC_PKA_ID,
+	STM32MP23_RIFSC_SAES_ID,
+#endif /* STM32MP23 */
+#if STM32MP25
 	STM32MP25_RIFSC_RNG_ID,
 	STM32MP25_RIFSC_PKA_ID,
 	STM32MP25_RIFSC_SAES_ID,
+#endif /* STM32MP25 */
 };
 
 int stm32_rifsc_semaphore_init(void)
@@ -61,7 +73,15 @@ void stm32_rifsc_ip_configure(int rimu_id, int rifsc_id, uint32_t param)
 {
 	uint32_t bit;
 
+#if STM32MP21
+	assert(rifsc_id < STM32MP21_RIFSC_MAX_ID);
+#endif /* STM32MP21 */
+#if STM32MP23
+	assert(rifsc_id < STM32MP23_RIFSC_MAX_ID);
+#endif /* STM32MP23 */
+#if STM32MP25
 	assert(rifsc_id < STM32MP25_RIFSC_MAX_ID);
+#endif /* STM32MP25 */
 
 	bit = BIT(rifsc_id / U(32));
 
