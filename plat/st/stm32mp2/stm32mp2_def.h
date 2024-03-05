@@ -637,6 +637,16 @@ enum ddr_type {
 /*******************************************************************************
  * RIFSC
  ******************************************************************************/
+#if STM32MP21
+#define STM32MP21_RIMU_OTG_HS		U(4)
+
+/*
+ * OTG_HS Secure/Priv Master (DMA) access
+ */
+#define RIFSC_USB_BOOT_OTG_HS_RIMC_CONF	(RIFSC_RIMC_ATTRx_MPRIV | RIFSC_RIMC_ATTRx_MSEC | \
+					 RIF_CID1 << RIFSC_RIMC_ATTRx_MCID_SHIFT | \
+					 RIFSC_RIMC_ATTRx_CIDSEL)
+#else /* !STM32MP21 */
 #define STM32MP2_RIMU_USB3DR		U(4)
 
 /*
@@ -645,6 +655,7 @@ enum ddr_type {
 #define RIFSC_USB_BOOT_USB3DR_RIMC_CONF	(RIFSC_RIMC_ATTRx_MPRIV | RIFSC_RIMC_ATTRx_MSEC | \
 					 RIF_CID1 << RIFSC_RIMC_ATTRx_MCID_SHIFT | \
 					 RIFSC_RIMC_ATTRx_CIDSEL)
+#endif /* STM32MP21 */
 
 /*******************************************************************************
  * STM32MP CA35SSC
