@@ -26,7 +26,6 @@
 #include <drivers/st/stm32_saes.h>
 #include <drivers/st/stm32mp_pmic2.h>
 #include <drivers/st/stm32mp_reset.h>
-#include <drivers/st/stm32mp_rifsc_regs.h>
 #include <drivers/st/stm32mp_risab_regs.h>
 #include <drivers/st/stm32mp2_ddr_helpers.h>
 #include <drivers/st/stm32mp2_ram.h>
@@ -402,20 +401,10 @@ skip_console_init:
 	mmio_write_32(RISAB3_BASE + RISAB_CR, RISAB_CR_SRWIAD);
 #endif
 #endif /* STM32MP_DDR_FIP_IO_STORAGE || TRUSTED_BOARD_BOOT */
-#if STM32MP_USB_PROGRAMMER
-	/*
-	 * Set USB3DR Peripheriphal accesses to Secure/Privilege only
-	 */
-	mmio_write_32(RIFSC_BASE + _RIFSC_RISC_SECCFGR(STM32MP25_RIFSC_USB3DR_ID),
-		     RIFSC_USB3DR_SEC);
-	mmio_write_32(RIFSC_BASE + _RIFSC_RISC_PRIVCFGR(STM32MP25_RIFSC_USB3DR_ID),
-		      RIFSC_USB3DR_PRIV);
 
-	/*
-	 * Apply USB boot specific configuration to RIF master USB3DR
-	 */
-	mmio_write_32(RIFSC_BASE + _RIFSC_RIMC_ATTR(STM32MP25_RIMU_USB3DR),
-		      RIFSC_USB_BOOT_USBDR_RIMC_CONF);
+#if STM32MP_USB_PROGRAMMER
+	stm32_rifsc_ip_configure(STM32MP2_RIMU_USB3DR, STM32MP25_RIFSC_USB3DR_ID,
+				 RIFSC_USB_BOOT_USB3DR_RIMC_CONF);
 #endif /* STM32MP_USB_PROGRAMMER */
 
 #if !STM32MP_M33_TDCID

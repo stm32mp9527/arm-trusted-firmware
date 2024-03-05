@@ -1,32 +1,20 @@
 /*
- * Copyright (c) 2023, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 
 #include <arch_helpers.h>
 #include <drivers/st/stm32_rifsc.h>
+#include <drivers/st/stm32mp_rifsc_regs.h>
 #include <dt-bindings/soc/rif.h>
 #include <lib/mmio.h>
 
 #include <platform_def.h>
-
-/* RIFSC general register field description */
-/* RIFSC_CIDCFGR register fields */
-#define _RIFSC_RISC_CIDCFGR(x)		(U(0x100) + U(0x8) * (x))
-#define _RIFSC_RISC_CFEN_MASK		BIT(0)
-#define _RIFSC_RISC_SEM_EN_MASK		BIT(1)
-#define _RIFSC_RISC_SEML_SHIFT		U(16)
-#define _RIFSC_RISC_SEML_MASK		GENMASK_32(23, 16)
-
-/* RIFSC_SEMCR register fields */
-#define _RIFSC_RISC_SEMCR(x)		(U(0x104) + U(0x8) * (x))
-#define _RIFSC_RISC_SEM_MUTEX		BIT(0)
-#define _RIFSC_RISC_SEMCID_SHIFT	U(4)
-#define _RIFSC_RISC_SEMCID_MASK		GENMASK_32(6, 4)
 
 static unsigned long rifsc_semaphores[] = {
 	STM32MP25_RIFSC_RNG_ID,
@@ -40,29 +28,47 @@ int stm32_rifsc_semaphore_init(void)
 
 	for (i = 0; i < ARRAY_SIZE(rifsc_semaphores); i++) {
 		uint32_t cidcfgr = mmio_read_32(RIFSC_BASE +
-						_RIFSC_RISC_CIDCFGR(rifsc_semaphores[i]));
+						_RIFSC_RISC_PERy_CIDCFGR(rifsc_semaphores[i]));
 		uint32_t semcfgr = mmio_read_32(RIFSC_BASE +
-						_RIFSC_RISC_SEMCR(rifsc_semaphores[i]));
+						_RIFSC_RISC_PERy_SEMCR(rifsc_semaphores[i]));
 
-		if (!(((cidcfgr & _RIFSC_RISC_CFEN_MASK) != 0U) &&
-		      ((cidcfgr & _RIFSC_RISC_SEM_EN_MASK) != 0U) &&
-		      ((cidcfgr & _RIFSC_RISC_SEML_MASK) >> _RIFSC_RISC_SEML_SHIFT) != RIF_CID1)) {
+		uint32_t sem_wl = (cidcfgr & _RIFSC_CIDCFGR_SEML_MASK) >> _RIFSC_CIDCFGR_SEML_SHIFT;
+
+		if (!(((cidcfgr & _RIFSC_CIDCFGR_CFEN) != 0U) &&
+		      ((cidcfgr & _RIFSC_CIDCFGR_SEM_EN) != 0U) &&
+		      ((sem_wl & RIF_CID1_BF) != RIF_CID1_BF))) {
 			continue;
 		}
 
-		if (((semcfgr & _RIFSC_RISC_SEM_MUTEX) != 0U) &&
-		    ((semcfgr & _RIFSC_RISC_SEMCID_MASK) >> _RIFSC_RISC_SEMCID_SHIFT) != RIF_CID1) {
+		if (((semcfgr & _RIFSC_SEMCR_SEM_MUTEX) != 0U) &&
+		    ((semcfgr & _RIFSC_SEMCR_SEMCID_MASK) >> _RIFSC_SEMCR_SEMCID_SHIFT) != RIF_CID1) {
 			return -EACCES;
 		}
 
-		mmio_write_32(RIFSC_BASE + _RIFSC_RISC_SEMCR(rifsc_semaphores[i]),
-			      _RIFSC_RISC_SEM_MUTEX);
+		mmio_write_32(RIFSC_BASE + _RIFSC_RISC_PERy_SEMCR(rifsc_semaphores[i]),
+			      _RIFSC_SEMCR_SEM_MUTEX);
 
-		if (((semcfgr & _RIFSC_RISC_SEM_MUTEX) != 0U) &&
-		    ((semcfgr & _RIFSC_RISC_SEMCID_MASK) >> _RIFSC_RISC_SEMCID_SHIFT) != RIF_CID1) {
+		if (((semcfgr & _RIFSC_SEMCR_SEM_MUTEX) != 0U) &&
+		    ((semcfgr & _RIFSC_SEMCR_SEMCID_MASK) >> _RIFSC_SEMCR_SEMCID_SHIFT) != RIF_CID1) {
 			return -EACCES;
 		}
 	}
 
 	return 0;
+}
+
+void stm32_rifsc_ip_configure(int rimu_id, int rifsc_id, uint32_t param)
+{
+	uint32_t bit;
+
+	assert(rifsc_id < STM32MP25_RIFSC_MAX_ID);
+
+	bit = BIT(rifsc_id / U(32));
+
+	/* Set peripheral accesses to Secure/Privilege only */
+	mmio_write_32(RIFSC_BASE + _RIFSC_RISC_SECCFGR(rifsc_id), bit);
+	mmio_write_32(RIFSC_BASE + _RIFSC_RISC_PRIVCFGR(rifsc_id), bit);
+
+	/* Apply specific configuration to RIF master */
+	mmio_write_32(RIFSC_BASE + _RIFSC_RIMC_ATTR(rimu_id), param);
 }

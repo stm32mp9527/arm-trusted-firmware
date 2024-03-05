@@ -10,6 +10,7 @@
 #include <common/tbbr/tbbr_img_def.h>
 #ifndef __ASSEMBLER__
 #include <drivers/st/bsec.h>
+#include <drivers/st/stm32mp_rifsc_regs.h>
 #include <drivers/st/stm32mp2_clk.h>
 #include <drivers/st/stm32mp2_risaf.h>
 #endif
@@ -35,6 +36,7 @@
 #include <dt-bindings/clock/stm32mp25-clks.h>
 #include <dt-bindings/clock/stm32mp25-clksrc.h>
 #include <dt-bindings/reset/stm32mp25-resets.h>
+#include <dt-bindings/soc/stm32mp25-rif.h>
 #endif /* STM32MP25 */
 #include <dt-bindings/gpio/stm32-gpio.h>
 #include <dt-bindings/soc/rif.h>
@@ -632,22 +634,14 @@ enum ddr_type {
 #define RISAF_SEED_SIZE_IN_BYTES		U(4)
 
 /*******************************************************************************
- * RIFSC IDs
+ * RIFSC
  ******************************************************************************/
-#define STM32MP25_RIFSC_USB3DR_ID	U(66)
-#define STM32MP25_RIFSC_RNG_ID		U(92)
-#define STM32MP25_RIFSC_PKA_ID		U(93)
-#define STM32MP25_RIFSC_SAES_ID		U(94)
-
-#define STM32MP25_RIMU_USB3DR		U(4)
-
-#define RIFSC_USB3DR_PRIV		BIT(STM32MP25_RIFSC_USB3DR_ID / U(32))
-#define RIFSC_USB3DR_SEC		BIT(STM32MP25_RIFSC_USB3DR_ID / U(32))
+#define STM32MP2_RIMU_USB3DR		U(4)
 
 /*
  * USB3DR Secure/Priv Master (DMA) access
  */
-#define RIFSC_USB_BOOT_USBDR_RIMC_CONF	(RIFSC_RIMC_ATTRx_MPRIV | RIFSC_RIMC_ATTRx_MSEC | \
+#define RIFSC_USB_BOOT_USB3DR_RIMC_CONF	(RIFSC_RIMC_ATTRx_MPRIV | RIFSC_RIMC_ATTRx_MSEC | \
 					 RIF_CID1 << RIFSC_RIMC_ATTRx_MCID_SHIFT | \
 					 RIFSC_RIMC_ATTRx_CIDSEL)
 
