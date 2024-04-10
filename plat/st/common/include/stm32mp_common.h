@@ -191,6 +191,7 @@ int stm32_get_stop2_entrypoint_cell(struct nvmem_cell *stop2_entrypoint);
 void stm32_fwu_set_boot_idx(void);
 uint32_t stm32_get_and_dec_fwu_trial_boot_cnt(void);
 void stm32_set_max_fwu_trial_boot_cnt(void);
+void stm32_clear_fwu_trial_boot_cnt(void);
 #endif /* PSA_FWU_SUPPORT */
 
 #endif /* STM32MP_COMMON_H */
