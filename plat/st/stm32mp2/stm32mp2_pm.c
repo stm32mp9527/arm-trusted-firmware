@@ -335,6 +335,11 @@ static bool stm32_freeze_other_core(unsigned int core_id)
 	return result;
 }
 
+bool stm32_pwr_cpu2_state_is_running(uintptr_t pwr_base)
+{
+	return (mmio_read_32(pwr_base + PWR_CPU2D2SR) & PWR_CPU2D2SR_CSTATE_MASK) != 0U;
+}
+
 static int stm32_pwr_domain_validate_suspend(const psci_power_state_t *target_state)
 {
 	uintptr_t pwr_base = stm32mp_pwr_base();
@@ -347,10 +352,15 @@ static int stm32_pwr_domain_validate_suspend(const psci_power_state_t *target_st
 		return PSCI_E_SUCCESS;
 	}
 
-	/* If CPU2 is not in reset: low power mode is not supported by CPU1 */
-	if ((mmio_read_32(pwr_base + PWR_CPU2D2SR) & PWR_CPU2D2SR_CSTATE_MASK) != 0U) {
-		WARN("PSCI power domain supend request with Cortex M33 running.\n");
-		return PSCI_E_INVALID_PARAMS;
+	/* If CPU2 is not in reset: limit supported low power modes */
+	if (stm32_pwr_cpu2_state_is_running(pwr_base)) {
+		/* PMIC update in OP-TEE is not allowed with M33 running */
+		if (stateid == PWRSTATE_STANDBY ||
+		    stateid == PWRSTATE_LPLV_STOP2 ||
+		    stateid == PWRSTATE_LPLV_STOP1) {
+			WARN("Invalid PSCI power state %x with Cortex M33 running.\n", stateid);
+			return PSCI_E_INVALID_PARAMS;
+		}
 	}
 
 	if (!stm32_freeze_other_core(core_id)) {
@@ -378,6 +388,8 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	uintptr_t rcc_base = stm32mp_rcc_base();
 	bool standby = false;
 	uint32_t stateid = stm32_get_stateid(target_state->pwr_domain_state);
+	bool cpu2_running = stm32_pwr_cpu2_state_is_running(pwr_base);
+	uint32_t pwr_r3cidcfgr = 0U;
 
 	/* If retention only at D1 level return as nothing is to be done */
 	if (stateid == PWRSTATE_RUN) {
@@ -409,19 +421,30 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	/* Disable DDRSHR to avoid STANDBY/STOP exit issue */
 	mmio_clrbits_32(rcc_base + RCC_DDRITFCFGR, RCC_DDRITFCFGR_DDRSHR);
 
+	if (!cpu2_running) {
+		/* Filtering for CID1 = CA35 on PWR resource 3 = PWR_CPU2CR */
+		pwr_r3cidcfgr = mmio_read_32(pwr_base + PWR_R3CIDCFGR);
+		mmio_write_32(pwr_base + PWR_R3CIDCFGR,
+			      (RIF_CID1 << PWR_R3CIDCFGR_SCID_SHIFT) | PWR_R3CIDCFGR_CFEN);
+	}
+
 	/* Perform the PWR configuration for the requested mode */
 	switch (stateid) {
 	case PWRSTATE_STOP1:
 		print_mode_verbose("Stop1");
 		mmio_write_32(pwr_base + PWR_CPU1CR, 0U);
-		mmio_write_32(pwr_base + PWR_CPU2CR, 0U);
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR, 0U);
+		}
 		stm32mp2_enable_rcc_wakeup_irq(rcc_base);
 		break;
 
 	case PWRSTATE_LP_STOP1:
 		print_mode_verbose("LP_Stop1");
 		mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_LPDS_D1);
-		mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2);
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2);
+		}
 		/* Wait VTT ramp-up delay for LP-Stop1 */
 		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, lpstop1_pwrlpdly);
 		stm32mp2_enable_rcc_wakeup_irq(rcc_base);
@@ -430,14 +453,19 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	case PWRSTATE_LPLV_STOP1:
 		print_mode_verbose("LPLV_Stop1");
 		mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_LPDS_D1 | PWR_CPU1CR_LVDS_D1);
-		mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2 | PWR_CPU2CR_LVDS_D2);
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR,
+				      PWR_CPU2CR_LPDS_D2 | PWR_CPU2CR_LVDS_D2);
+		}
 		stm32mp2_enable_rcc_wakeup_irq(rcc_base);
 		break;
 
 	case PWRSTATE_STOP2:
 		print_mode_info("Stop2");
 		mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_PDDS_D1);
-		mmio_write_32(pwr_base + PWR_CPU2CR, 0U);
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR, 0U);
+		}
 		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, stop2_pwrlpdly);
 		stm32mp_gic_cpuif_disable();
 		stm32mp_gic_save();
@@ -447,7 +475,9 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	case PWRSTATE_LP_STOP2:
 		print_mode_info("LP_Stop2");
 		mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_PDDS_D1);
-		mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2);
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2);
+		}
 		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, stop2_pwrlpdly);
 		stm32mp_gic_cpuif_disable();
 		stm32mp_gic_save();
@@ -457,7 +487,10 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	case PWRSTATE_LPLV_STOP2:
 		print_mode_info("LPLV_Stop2");
 		mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_PDDS_D1);
-		mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2 | PWR_CPU2CR_LVDS_D2);
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR,
+				      PWR_CPU2CR_LPDS_D2 | PWR_CPU2CR_LVDS_D2);
+		}
 		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, stop2_pwrlpdly);
 		stm32mp_gic_cpuif_disable();
 		stm32mp_gic_save();
@@ -467,8 +500,9 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	case PWRSTATE_STANDBY:
 		print_mode_info("Standby1");
 		mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_PDDS_D1 | PWR_CPU1CR_PDDS_D2);
-		mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_PDDS_D2);
-
+		if (!cpu2_running) {
+			mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_PDDS_D2);
+		}
 		stm32mp_gic_cpuif_disable();
 		stm32mp2_pll1_disable();
 		break;
@@ -480,7 +514,11 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 
 	/* Clear previous status */
 	mmio_setbits_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_CSSF);
-	mmio_setbits_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_CSSF);
+	if (!cpu2_running) {
+		mmio_setbits_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_CSSF);
+		/* Restore RIF config for resource 3 = PWR_CPU2CR */
+		mmio_write_32(pwr_base + PWR_R3CIDCFGR, pwr_r3cidcfgr);
+	}
 #if !STM32MP21
 	mmio_setbits_32(pwr_base + PWR_CPU3CR, PWR_CPU3CR_CSSF);
 #endif /* !STM32MP21 */
@@ -681,11 +719,14 @@ static void __dead2 stm32_system_off(void)
 	}
 
 	/* If CPU2 is not in reset */
-	if ((mmio_read_32(pwr_base + PWR_CPU2D2SR) & PWR_CPU2D2SR_CSTATE_MASK) != 0U) {
+	if (stm32_pwr_cpu2_state_is_running(pwr_base)) {
 		WARN("PSCI system off with Cortex M33 running.\n");
 		/* Force Hold Boot and reset of CPU2 = Cortex M33 */
 		mmio_clrbits_32(rcc_base + RCC_CPUBOOTCR, RCC_CPUBOOTCR_BOOT_CPU2);
 		mmio_setbits_32(rcc_base + RCC_C2RSTCSETR, RCC_C2RSTCSETR_C2RST);
+		dsb();
+		/* Deactivate CID filtering on region 3 for PWR_CPU2CR */
+		mmio_write_32(pwr_base + PWR_R3CIDCFGR, 0U);
 	}
 
 #if !STM32MP21
@@ -878,6 +919,7 @@ static void stm32_get_sys_suspend_power_state(psci_power_state_t *req_state)
 	unsigned int state_id;
 	unsigned int pwr_state, max_pwr_state = PWRSTATE_STANDBY;
 	unsigned int i;
+	uintptr_t pwr_base = stm32mp_pwr_base();
 	uintptr_t exti_base = STM32MP_EXTI1_BASE;
 	uint32_t c1imr1 = mmio_read_32(exti_base + EXTI1_C1IMR1);
 	uint32_t c1imr2 = mmio_read_32(exti_base + EXTI1_C1IMR2);
@@ -895,6 +937,12 @@ static void stm32_get_sys_suspend_power_state(psci_power_state_t *req_state)
 		max_pwr_state = PWRSTATE_LP_STOP2;
 		VERBOSE("%s: max_pwr_state = PWRSTATE_LP_STOP2, C1IMR1=%x, C1IMR2=%x, C1IMR3=%x\n",
 			__func__, c1imr1, c1imr2, c1imr3);
+	}
+
+	/* M33 is running: Standby1 and LPLV are not allowed, no PMIC update */
+	if (stm32_pwr_cpu2_state_is_running(pwr_base)) {
+		max_pwr_state = PWRSTATE_LP_STOP2;
+		VERBOSE("%s: max_pwr_state = PWRSTATE_LP_STOP2, M33 is running\n", __func__);
 	}
 
 	/* Search the max supported POWERDOWN modes  <= max_pwr_state */
