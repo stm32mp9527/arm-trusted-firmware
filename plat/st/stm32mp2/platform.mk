@@ -32,14 +32,23 @@ DTB_FILE_NAME			?=	stm32mp257f-ev1.dtb
 
 STM32MP21			?=	0
 STM32MP23			?=	0
-STM32MP25			?=	1
+STM32MP25			?=	0
 STM32MP_M33_TDCID		?=	0
 
 ifeq ($(STM32MP21),1)
+ifeq ($(STM32MP23),1)
+$(error Cannot enable both flags STM32MP21 and STM32MP23)
+endif
+ifeq ($(STM32MP25),1)
+$(error Cannot enable both flags STM32MP21 and STM32MP25)
+endif
 STM32MP21			:=	1
 STM32MP23			:=	0
 STM32MP25			:=	0
 else ifeq ($(STM32MP23),1)
+ifeq ($(STM32MP25),1)
+$(error Cannot enable both flags STM32MP23 and STM32MP25)
+endif
 STM32MP21			:=	0
 STM32MP23			:=	1
 STM32MP25			:=	0
