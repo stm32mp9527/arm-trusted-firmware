@@ -17,7 +17,7 @@
 	compatible = "st,stm32mp215f-dk", "st,stm32mp215";
 
 	aliases {
-		/* serial0 = &usart2; */
+		serial0 = &usart2;
 	};
 
 	chosen {
@@ -28,4 +28,10 @@
 		device_type = "memory";
 		reg = <0x0 0x80000000 0x0 0x80000000>;
 	};
+};
+
+&usart2 {
+	pinctrl-names = "default", "idle", "sleep";
+	pinctrl-0 = <&usart2_pins_a>;
+	status = "okay";
 };
