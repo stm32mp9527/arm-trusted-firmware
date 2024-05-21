@@ -802,8 +802,9 @@ static int _clk_stm32_pll_wait_ready_on(struct stm32_clk_priv *priv,
 	/* Wait PLL lock */
 	while ((mmio_read_32(pllxcfgr1) & RCC_PLLxCFGR1_PLLRDY) == 0U) {
 		if (timeout_elapsed(timeout)) {
-			ERROR("CLK %d : PLL start failed @ 0x%x: 0x%x\n",
-			      pll->clk_id, pll->reg_pllxcfgr1, mmio_read_32(pllxcfgr1));
+			ERROR("PLL%d start failed @ 0x%x: 0x%x\n",
+			      pll->clk_id - _CK_PLL1 + 1, pll->reg_pllxcfgr1,
+			      mmio_read_32(pllxcfgr1));
 			return -ETIMEDOUT;
 		}
 	}
@@ -821,7 +822,7 @@ static int _clk_stm32_pll_wait_ready_off(struct stm32_clk_priv *priv,
 	while ((mmio_read_32(pllxcfgr1) & RCC_PLLxCFGR1_PLLRDY) != 0U) {
 		if (timeout_elapsed(timeout)) {
 			ERROR("PLL%d stop failed @ 0x%lx: 0x%x\n",
-			      pll->clk_id, pllxcfgr1, mmio_read_32(pllxcfgr1));
+			      pll->clk_id - _CK_PLL1 + 1, pllxcfgr1, mmio_read_32(pllxcfgr1));
 			return -ETIMEDOUT;
 		}
 	}
@@ -1785,7 +1786,7 @@ static int clk_stm32_pll_wait_mux_ready(struct stm32_clk_priv *priv,
 	while ((mmio_read_32(pllxcfgr1) & RCC_PLLxCFGR1_CKREFST) !=
 	       RCC_PLLxCFGR1_CKREFST) {
 		if (timeout_elapsed(timeout)) {
-			EARLY_ERROR("PLL%d ref clock not started\n", pll->clk_id);
+			EARLY_ERROR("PLL%d ref clock not started\n", pll->clk_id - _CK_PLL1 + 1);
 			return -ETIMEDOUT;
 		}
 	}
