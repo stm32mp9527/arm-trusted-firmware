@@ -13,5 +13,13 @@
 			resets = <&rcc SAES_R>;
 			status = "disabled";
 		};
+
+		pka: pka@42032000 {
+			compatible = "st,stm32mp13-pka64";
+			reg = <0x42032000 0x2000>;
+			clocks = <&rcc CK_BUS_PKA>;
+			resets = <&rcc PKA_R>;
+			status = "disabled";
+		};
 	};
 };
