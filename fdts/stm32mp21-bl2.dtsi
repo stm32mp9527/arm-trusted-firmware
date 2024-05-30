@@ -7,9 +7,10 @@
 
 / {
 	soc@0 {
-#if !STM32MP_SDMMC
+#if !STM32MP_EMMC && !STM32MP_SDMMC
 		bus@42080000 {
 			/delete-node/ mmc@48220000;
+			/delete-node/ mmc@48230000;
 		};
 #endif
 	};
