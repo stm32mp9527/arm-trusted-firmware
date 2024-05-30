@@ -5,6 +5,8 @@
 
 / {
 	soc@0 {
+		/delete-node/ memory-controller@48200000;
+
 		bus@42080000 {
 			/delete-node/ mmc@48220000;
 			/delete-node/ mmc@48230000;
