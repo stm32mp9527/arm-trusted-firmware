@@ -205,6 +205,14 @@
 				status = "disabled";
 			};
 
+			ospi1: spi@40430000 {
+				compatible = "st,stm32mp25-omi";
+				reg = <0x40430000 0x400>;
+				clocks = <&rcc CK_KER_OSPI1>;
+				resets = <&rcc OSPI1_R>, <&rcc OSPI1DLL_R>;
+				status = "disabled";
+			};
+
 			rng2: rng@42020000 {
 				compatible = "st,stm32mp13-rng";
 				reg = <0x42020000 0x400>;

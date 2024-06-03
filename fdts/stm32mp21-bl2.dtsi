@@ -7,6 +7,11 @@
 
 / {
 	soc@0 {
+#if !STM32MP_SPI_NAND && !STM32MP_SPI_NOR
+		bus@42080000 {
+			/delete-node/ spi@40430000;
+		};
+#endif
 #if !STM32MP_RAW_NAND
 		/delete-node/ memory-controller@48200000;
 #endif
