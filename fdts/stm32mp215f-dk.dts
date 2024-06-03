@@ -30,6 +30,10 @@
 	};
 };
 
+&hash1 {
+	status = "okay";
+};
+
 &i2c3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c3_pins_a>;
@@ -43,6 +47,22 @@
 
 &iwdg1 {
 	timeout-sec = <32>;
+	status = "okay";
+};
+
+&pka {
+	status = "okay";
+};
+
+&rng1 {
+	status = "okay";
+};
+
+&rng2 {
+	status = "okay";
+};
+
+&saes {
 	status = "okay";
 };
 
