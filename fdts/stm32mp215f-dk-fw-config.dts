@@ -4,3 +4,4 @@
  */
 
 #include "stm32mp21-fw-config.dtsi"
+#include "stm32mp215f-dk-ca35tdcid-fw-config.dtsi"
