@@ -83,11 +83,11 @@ void stm32_rifsc_ip_configure(int rimu_id, int rifsc_id, uint32_t param)
 	assert(rifsc_id < STM32MP25_RIFSC_MAX_ID);
 #endif /* STM32MP25 */
 
-	bit = BIT(rifsc_id / U(32));
+	bit = BIT(rifsc_id % U(32));
 
 	/* Set peripheral accesses to Secure/Privilege only */
-	mmio_write_32(RIFSC_BASE + _RIFSC_RISC_SECCFGR(rifsc_id), bit);
-	mmio_write_32(RIFSC_BASE + _RIFSC_RISC_PRIVCFGR(rifsc_id), bit);
+	mmio_setbits_32(RIFSC_BASE + _RIFSC_RISC_SECCFGR(rifsc_id), bit);
+	mmio_setbits_32(RIFSC_BASE + _RIFSC_RISC_PRIVCFGR(rifsc_id), bit);
 
 	/* Apply specific configuration to RIF master */
 	mmio_write_32(RIFSC_BASE + _RIFSC_RIMC_ATTR(rimu_id), param);
