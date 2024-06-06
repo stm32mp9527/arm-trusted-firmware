@@ -673,6 +673,7 @@ void stm32mp1_ddr_init(struct stm32mp_ddr_priv *priv,
 	}
 
 	if (ret != 0) {
+		ERROR("DDR power init failed\n");
 		panic();
 	}
 
