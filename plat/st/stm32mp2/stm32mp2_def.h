@@ -108,12 +108,11 @@
 #define STM32MP257F_PART_NB	U(0x80002000)
 #endif /* STM32MP25 */
 
-#if STM32MP21
-#define STM32MP2_REV_A		U(0x0000)
-#else /* STM32MP21 */
-#define STM32MP2_REV_A		U(0x1000)
-#endif /* STM32MP21 */
-#define STM32MP2_REV_B		U(0x2000)
+#define STM32MP2_REV_A		U(0x08)
+#define STM32MP2_REV_B		U(0x10)
+#define STM32MP2_REV_X		U(0x12)
+#define STM32MP2_REV_Y		U(0x11)
+#define STM32MP2_REV_Z		U(0x09)
 
 /*******************************************************************************
  * PACKAGE ID
@@ -449,16 +448,17 @@ enum ddr_type {
 #define STM32MP2_UPPER_OTP_START		0x100U
 
 /* OTP labels */
-#define PART_NUMBER_OTP				"part_number_otp"
-#define PACKAGE_OTP				"package_otp"
-#define HCONF1_OTP				"otp124"
-#define NAND_OTP				"otp16"
-#define NAND2_OTP				"otp20"
-#define BOARD_ID_OTP				"board_id"
-#define UID_OTP					"uid_otp"
-#define LIFECYCLE2_OTP				"otp18"
-#define PKH_OTP					"otp144"
-#define ENCKEY_OTP				"otp260"
+#define PART_NUMBER_OTP			"part_number_otp"
+#define REVISION_OTP			"rev_otp"
+#define PACKAGE_OTP			"package_otp"
+#define HCONF1_OTP			"otp124"
+#define NAND_OTP			"otp16"
+#define NAND2_OTP			"otp20"
+#define BOARD_ID_OTP			"board_id"
+#define UID_OTP				"uid_otp"
+#define LIFECYCLE2_OTP			"otp18"
+#define PKH_OTP				"otp144"
+#define ENCKEY_OTP			"otp260"
 
 /* OTP mask */
 /* PACKAGE */
