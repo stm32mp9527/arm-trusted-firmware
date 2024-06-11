@@ -34,6 +34,9 @@ endif
 ENABLE_SPE_FOR_NS		:=	0
 ENABLE_SVE_FOR_NS		:=	0
 
+# Don't have the Linux kernel as a BL33 image by default
+ARM_LINUX_KERNEL_AS_BL33	:=	0
+
 # Enable PSCI v1.0 extended state ID format
 PSCI_EXTENDED_STATE_ID		:= 	1
 PSCI_OS_INIT_MODE		:= 	1
@@ -202,6 +205,7 @@ endif
 # Enable flags for C files
 $(eval $(call assert_booleans,\
 	$(sort \
+		ARM_LINUX_KERNEL_AS_BL33 \
 		PKA_USE_BRAINPOOL_P256T1 \
 		PKA_USE_NIST_P256 \
 		STM32MP_CRYPTO_ROM_LIB \
@@ -233,6 +237,7 @@ $(eval $(call assert_numerics,\
 
 $(eval $(call add_defines,\
 	$(sort \
+		ARM_LINUX_KERNEL_AS_BL33 \
 		DWL_BUFFER_BASE \
 		PKA_USE_BRAINPOOL_P256T1 \
 		PKA_USE_NIST_P256 \
