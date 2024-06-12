@@ -152,11 +152,12 @@ static int ssp_pub_key_prog(boot_api_context_t *boot_context)
 			return -EINVAL;
 		}
 
-		value++;
 		if (bsec_permanent_lock_otp(i) != BSEC_OK) {
 			ERROR("Error locking OTP %u\n", i);
 			panic();
 		}
+
+		value++;
 	}
 
 	return 0;
@@ -502,7 +503,7 @@ static void cleanup_otp_value(void)
 	}
 
 	for (i = SSP_OTP_SECRET_BASE; i < SSP_OTP_SECRET_END + 1U; i++) {
-		if (bsec_write_otp(0U, otp_rma.idx) != BSEC_OK) {
+		if (bsec_write_otp(0U, i) != BSEC_OK) {
 			return;
 		}
 	}
@@ -1015,7 +1016,6 @@ void bl2_el3_plat_arch_setup(void)
 	if ((boot_context->p_ssp_config == NULL) ||
 	    (boot_context->p_ssp_config->ssp_cmd !=
 	     BOOT_API_CTX_SSP_CMD_PROV_SECRET_ACK)) {
-		stm32mp_print_cpuinfo();
 		if (!stm32mp_is_auth_supported()) {
 			ERROR("Chip doesn't support SSP\n");
 			panic();
