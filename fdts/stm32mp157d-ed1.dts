@@ -49,6 +49,12 @@
 	cpu-supply = <&vddcore>;
 };
 
+&ddr {
+	vdd-supply = <&vdd_ddr>;
+	vtt-supply = <&vtt_ddr>;
+	vref-supply = <&vref_ddr>;
+};
+
 &hash1 {
 	status = "okay";
 };
