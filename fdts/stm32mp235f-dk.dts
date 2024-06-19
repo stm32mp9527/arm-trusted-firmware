@@ -47,6 +47,12 @@
 	};
 };
 
+&ddr {
+	vdd1-supply = <&vdd1_ddr>;
+	vdd2-supply = <&vdd2_ddr>;
+	vddq-supply = <&vdd2_ddr>;
+};
+
 &hash {
 	status = "okay";
 };
@@ -126,6 +132,7 @@
 				regulator-name = "vdd1_ddr";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
+				regulator-enable-ramp-delay = <1000>;
 			};
 			vdd3v3_usb: ldo4 {
 				regulator-name = "vdd3v3_usb";
