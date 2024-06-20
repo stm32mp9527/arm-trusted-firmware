@@ -239,8 +239,7 @@ PLAT_BL_COMMON_SOURCES  +=	drivers/st/nvmem/stm32mp_tamp_nvram_mp1.c
 ifeq ($(STM32MP13),1)
 PLAT_BL_COMMON_SOURCES	+=	drivers/st/clk/clk-stm32-core.c				\
 				drivers/st/clk/clk-stm32mp13.c				\
-				drivers/st/crypto/stm32_rng.c				\
-				drivers/st/crypto/stm32_saes.c
+				drivers/st/crypto/stm32_rng.c
 else
 PLAT_BL_COMMON_SOURCES	+=	drivers/st/clk/stm32mp1_clk.c
 endif
@@ -258,6 +257,7 @@ endif
 ifeq (${TRUSTED_BOARD_BOOT},1)
 ifeq ($(STM32MP13),1)
 BL2_SOURCES		+=	drivers/st/crypto/stm32_pka.c
+BL2_SOURCES		+=	drivers/st/crypto/stm32_saes.c
 endif
 endif
 
