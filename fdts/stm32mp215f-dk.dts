@@ -43,6 +43,76 @@
 	status = "okay";
 	#address-cells = <1>;
 	#size-cells = <0>;
+
+	pmic2: pmic@33 {
+		compatible = "st,stpmic2l";
+		reg = <0x33>;
+		status = "okay";
+
+		regulators {
+			compatible = "st,stpmic2-regulators";
+
+			vddcore: buck1 {
+				regulator-name = "vddcore";
+				regulator-min-microvolt = <820000>;
+				regulator-max-microvolt = <820000>;
+				regulator-always-on;
+			};
+			vdd2_ddr: buck2 {
+				regulator-name = "vdd2_ddr";
+				regulator-min-microvolt = <1100000>;
+				regulator-max-microvolt = <1100000>;
+			};
+			vddcpu: buck3 {
+				regulator-name = "vddcpu";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <910000>;
+				regulator-always-on;
+			};
+			vdda1v8_aon: ldo1 {
+				regulator-name = "vdda1v8_aon";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-always-on;
+				st,mask-reset;
+			};
+			vddio_pmic: ldo2 {
+				regulator-name = "vddio_pmic";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-always-on;
+				st,mask-reset;
+			};
+			vdd1_ddr: ldo3 {
+				regulator-name = "vdd1_ddr";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-enable-ramp-delay = <1000>;
+			};
+			vdd3v3_usb: ldo4 {
+				regulator-name = "vdd3v3_usb";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+			};
+			vdd_flash: ldo5 {
+				regulator-name = "vdd_flash";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+			};
+			vdda_1v8: ldo6 {
+				regulator-name = "vdda_1v8";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-always-on;
+			};
+			v3v3: gpo1 {
+				regulator-name = "v3v3";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-always-on;
+			};
+		};
+	};
 };
 
 &iwdg1 {
@@ -52,6 +122,24 @@
 
 &pka {
 	status = "okay";
+};
+
+&pwr {
+	vddio1 {
+		vddio1-supply = <&vddio_pmic>;
+	};
+
+	vddio2 {
+		vddio2-supply = <&vdda_1v8>;
+	};
+
+	vddio3 {
+		vddio3-supply = <&vddio_pmic>;
+	};
+
+	vddio {
+		vdd-supply = <&vddio_pmic>;
+	};
 };
 
 &rng1 {
