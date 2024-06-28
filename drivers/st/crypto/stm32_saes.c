@@ -128,9 +128,11 @@ static int saes_start(struct stm32_saes_context *ctx)
 	uint64_t timeout;
 
 	/* Reset IP */
-	mmio_setbits_32(ctx->base + _SAES_CR, _SAES_CR_IPRST);
-	udelay(SAES_RESET_DELAY);
-	mmio_clrbits_32(ctx->base + _SAES_CR, _SAES_CR_IPRST);
+	if ((mmio_read_32(ctx->base + _SAES_SR) & _SAES_SR_BUSY) != _SAES_SR_BUSY) {
+		mmio_setbits_32(ctx->base + _SAES_CR, _SAES_CR_IPRST);
+		udelay(SAES_RESET_DELAY);
+		mmio_clrbits_32(ctx->base + _SAES_CR, _SAES_CR_IPRST);
+	}
 
 	timeout = timeout_init_us(SAES_TIMEOUT_US);
 	while ((mmio_read_32(ctx->base + _SAES_SR) & _SAES_SR_BUSY) == _SAES_SR_BUSY) {
