@@ -30,6 +30,13 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 
 	stm32mp_setup_early_console();
 
+	/*
+	 * Invalidate remaining data from second half of SYSRAM (used by BL2) as this area will
+	 * be later used as non-secure.
+	 */
+	inv_dcache_range(STM32MP_SYSRAM_BASE + STM32MP_SYSRAM_SIZE / 2U,
+			 STM32MP_SYSRAM_SIZE / 2U);
+
 	mmap_add_region(BL_CODE_BASE, BL_CODE_BASE,
 			BL_CODE_END - BL_CODE_BASE,
 			MT_CODE | MT_SECURE);
@@ -64,6 +71,17 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	stm32_tamp_nvram_init();
 
 	(void)stm32mp_uart_console_setup();
+
+	/*
+	 * Map upper SYSRAM where bl_params_t are stored in BL2
+	 */
+	ret = mmap_add_dynamic_region(STM32MP_SYSRAM_BASE + STM32MP_SYSRAM_SIZE / 2U,
+				      STM32MP_SYSRAM_BASE + STM32MP_SYSRAM_SIZE / 2U,
+				      STM32MP_SYSRAM_SIZE / 2U, MT_RO_DATA | MT_SECURE);
+	if (ret < 0) {
+		ERROR("BL2 params area mapping: %d\n", ret);
+		panic();
+	}
 
 	assert(arg0 != 0UL);
 	params_from_bl2 = (bl_params_t *)arg0;
@@ -102,6 +120,13 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 		bl_params = bl_params->next_params_info;
 	}
 
+	ret = mmap_remove_dynamic_region(STM32MP_SYSRAM_BASE + STM32MP_SYSRAM_SIZE / 2U,
+					 STM32MP_SYSRAM_SIZE / 2U);
+	if (ret < 0) {
+		ERROR("BL2 params area unmapping: %d\n", ret);
+		panic();
+	}
+
 	/*
 	 * This stm32mp_get_soc_name() call is mandatory here to store SoC part number,
 	 * and avoid using BL31 DT at runtime to check stm32mp_is_single_core().
@@ -125,7 +150,7 @@ void bl31_plat_arch_setup(void)
 
 		/* Jump manually to BL31 warm entry point, with MMU disabled. */
 		dsbsy();
-		flush_dcache_range(STM32MP_SYSRAM_BASE, STM32MP_SYSRAM_SIZE);
+		flush_dcache_range(STM32MP_SYSRAM_BASE, STM32MP_SYSRAM_SIZE / 2U);
 		disable_mmu_el3();
 		bl31_warm_entrypoint();
 		panic();
