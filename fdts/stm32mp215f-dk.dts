@@ -42,6 +42,12 @@
 	};
 };
 
+&bsec {
+	board_id: board_id@3d8 {
+		reg = <0x3d8 0x4>;
+	};
+};
+
 &ddr {
 	vdd1-supply = <&vdd1_ddr>;
 	vdd2-supply = <&vdd2_ddr>;
