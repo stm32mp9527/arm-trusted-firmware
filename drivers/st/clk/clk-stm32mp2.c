@@ -1498,7 +1498,8 @@ enum clksrc_id {
 	CLKSRC_NB
 };
 
-static void stm32mp2_a35_ss_on_hsi(void)
+/* switch CA35 clock on bypass clock aka ck_cpu1_ext2f = flexgen63 */
+static void stm32mp2_a35_ss_on_bypass(void)
 {
 	uintptr_t a35_ss_address = A35SSC_BASE;
 	uintptr_t chgclkreq_reg = a35_ss_address + A35_SS_CHGCLKREQ;
@@ -1748,7 +1749,7 @@ static int _clk_stm32_pll1_init(struct stm32_clk_priv *priv, int pll_idx,
 	    a configuration on the fly.
 	 */
 
-	stm32mp2_a35_ss_on_hsi();
+	stm32mp2_a35_ss_on_bypass();
 
 	ret = stm32_clk_configure_mux(priv, pll_conf->src);
 	if (ret != 0) {
@@ -2081,7 +2082,8 @@ static void stm32_enable_oscillator_lse(struct stm32_clk_priv *priv)
 
 static int stm32mp2_clk_switch_to_hsi(struct stm32_clk_priv *priv)
 {
-	stm32mp2_a35_ss_on_hsi();
+	/* on reset, bypass use HSI for CA35 clock (FLEXGEN63 = ck_cpu1_ext2f) */
+	stm32mp2_a35_ss_on_bypass();
 	stm32mp2_clk_muxsel_on_hsi(priv);
 #if !STM32MP_M33_TDCID
 	stm32mp2_clk_xbar_on_hsi(priv);
@@ -2586,7 +2588,7 @@ int stm32mp2_pll1_disable(void)
 	saved_pll_freq1_reg = mmio_read_32(pll_freq1_reg);
 	saved_pll_freq2_reg = mmio_read_32(pll_freq2_reg);
 
-	stm32mp2_a35_ss_on_hsi();
+	stm32mp2_a35_ss_on_bypass();
 
 	mmio_clrbits_32(pll_enable_reg, A35_SS_PLL_ENABLE_PD);
 
