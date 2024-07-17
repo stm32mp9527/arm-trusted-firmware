@@ -472,7 +472,7 @@ static int _clk_stm32_enable_core(struct stm32_clk_priv *priv, int id)
 
 	priv->gate_refcounts[id]++;
 
-	if (priv->gate_refcounts[id] == UINT_MAX) {
+	if (priv->gate_refcounts[id] == UINT8_MAX) {
 		ERROR("%s: %d max enable count !", __func__, id);
 		panic();
 	}
