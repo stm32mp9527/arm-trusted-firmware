@@ -39,39 +39,21 @@ STM32MP23			?=	0
 STM32MP25			?=	0
 STM32MP_M33_TDCID		?=	0
 
-ifeq ($(STM32MP21),1)
-ifeq ($(STM32MP23),1)
-$(error Cannot enable both flags STM32MP21 and STM32MP23)
-endif
-ifeq ($(STM32MP25),1)
-$(error Cannot enable both flags STM32MP21 and STM32MP25)
-endif
+ifneq ($(findstring stm32mp21,$(DTB_FILE_NAME)),)
 STM32MP21			:=	1
-STM32MP23			:=	0
-STM32MP25			:=	0
-else ifeq ($(STM32MP23),1)
-ifeq ($(STM32MP25),1)
-$(error Cannot enable both flags STM32MP23 and STM32MP25)
 endif
-STM32MP21			:=	0
+ifneq ($(findstring stm32mp23,$(DTB_FILE_NAME)),)
 STM32MP23			:=	1
-STM32MP25			:=	0
-else ifeq ($(STM32MP25),1)
-STM32MP21			:=	0
-STM32MP23			:=	0
+endif
+ifneq ($(findstring stm32mp25,$(DTB_FILE_NAME)),)
 STM32MP25			:=	1
-else ifneq ($(findstring stm32mp21,$(DTB_FILE_NAME)),)
-STM32MP21			:=	1
-STM32MP23			:=	0
-STM32MP25			:=	0
-else ifneq ($(findstring stm32mp23,$(DTB_FILE_NAME)),)
-STM32MP21			:=	0
-STM32MP23			:=	1
-STM32MP25			:=	0
-else ifneq ($(findstring stm32mp25,$(DTB_FILE_NAME)),)
-STM32MP21			:=	0
-STM32MP23			:=	0
-STM32MP25			:=	1
+endif
+ifneq ($(filter 1,$(STM32MP21) $(STM32MP23) $(STM32MP25)), 1)
+$(warning STM32MP21=$(STM32MP21))
+$(warning STM32MP23=$(STM32MP23))
+$(warning STM32MP25=$(STM32MP25))
+$(warning DTB_FILE_NAME=$(DTB_FILE_NAME))
+$(error Cannot enable 2 flags STM32MP2X)
 endif
 
 STM32MP_USE_EXTERNAL_HEAP 	:=	1
