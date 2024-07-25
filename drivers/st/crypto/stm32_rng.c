@@ -195,7 +195,7 @@ int stm32_rng_read(uint8_t *out, uint32_t size)
 			data32 = mmio_read_32(stm32_rng.base + RNG_DR);
 			count--;
 
-			memcpy(buf, &data32, MIN(len, sizeof(uint32_t)));
+			(void)memcpy(buf, (uint8_t *)&data32, MIN(len, sizeof(uint32_t)));
 			buf += MIN(len, sizeof(uint32_t));
 			len -= MIN(len, sizeof(uint32_t));
 
@@ -207,7 +207,7 @@ int stm32_rng_read(uint8_t *out, uint32_t size)
 
 bail:
 	if (rc != 0) {
-		memset(out, 0, buf - out);
+		(void)memset(out, 0, buf - out);
 	}
 
 	return rc;
@@ -219,12 +219,10 @@ bail:
  */
 void stm32_rng_select(uintptr_t rng_base)
 {
-	if ((stm32_rng.base != 0U) && (stm32_rng.clock != 0U)) {
-		/* Driver is already initialized */
-		return;
+	if ((stm32_rng.base == 0U) || (stm32_rng.clock == 0U)) {
+		/* RNG instance is selected once */
+		stm32_rng.base = rng_base;
 	}
-
-	stm32_rng.base = rng_base;
 }
 
 /*
