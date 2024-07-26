@@ -797,6 +797,7 @@ uint32_t plat_fwu_get_boot_idx(void)
 
 	if (boot_idx == INVALID_BOOT_IDX) {
 		const struct fwu_metadata *data = fwu_get_metadata();
+		uint32_t bootcount = 0;
 
 		boot_idx = data->active_index;
 
@@ -805,7 +806,7 @@ uint32_t plat_fwu_get_boot_idx(void)
 			stm32_set_max_fwu_trial_boot_cnt();
 			break;
 		case FWU_BANK_STATE_VALID:
-			uint32_t bootcount = stm32_get_and_dec_fwu_trial_boot_cnt();
+			bootcount = stm32_get_and_dec_fwu_trial_boot_cnt();
 			if (bootcount == 1U) {
 				WARN("Trial FWU fails %u times\n",
 				     (FWU_MAX_TRIAL_REBOOT - 1U));
