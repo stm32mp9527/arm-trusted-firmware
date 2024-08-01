@@ -25,7 +25,7 @@
 void stm32mp_save_boot_ctx_address(uintptr_t address);
 uintptr_t stm32mp_get_boot_ctx_address(void);
 uint16_t stm32mp_get_boot_itf_selected(void);
-#if STM32MP13 || STM32MP15
+#ifdef STM32MP1X
 uint32_t stm32mp_get_boot_action(void);
 #endif
 
@@ -178,7 +178,7 @@ int stm32_get_magic_number_cell(struct nvmem_cell *magic_number);
 int stm32_get_core1_branch_address_cell(struct nvmem_cell *core1_branch_address);
 #endif
 
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 int stm32_get_stop2_entrypoint_cell(struct nvmem_cell *stop2_entrypoint);
 #endif
 

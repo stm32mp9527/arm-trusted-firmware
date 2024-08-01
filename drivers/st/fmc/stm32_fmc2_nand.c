@@ -26,12 +26,12 @@
 #define TIMEOUT_US_1_MS			1000U
 
 /* FMC2 Compatibility */
-#if STM32MP13 || STM32MP15
+#ifdef STM32MP1X
 #define DT_FMC2_EBI_COMPAT		"st,stm32mp1-fmc2-ebi"
 #define DT_FMC2_NFC_COMPAT		"st,stm32mp1-fmc2-nfc"
 #define MAX_CS				2U
 #endif
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 #define DT_FMC2_EBI_COMPAT		"st,stm32mp25-fmc2-ebi"
 #define DT_FMC2_NFC_COMPAT		"st,stm32mp25-fmc2-nfc"
 #define MAX_CS				4U
@@ -687,7 +687,7 @@ static void stm32_fmc2_write_data(struct nand_device *nand,
 	}
 }
 
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 static int stm32_fmc2_check_rif(unsigned int resource)
 {
 	uint32_t cidcfgr;
@@ -772,10 +772,10 @@ static void stm32_fmc2_ctrl_init(void)
 	pcr |= FMC2_PCR_TAR(FMC2_PCR_TAR_DEFAULT);
 
 	/* Enable FMC2 controller */
-#if STM32MP13 || STM32MP15
+#ifdef STM32MP1X
 	mmio_setbits_32(fmc2_base() + FMC2_BCR1, FMC2_BCR1_FMC2EN);
 #endif
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 	if ((mmio_read_32(fmc2_base() + FMC2_SR) & FMC2_SR_ISOST) != 0U) {
 		/* FMC2 is disabled */
 		if (stm32_fmc2_check_rif(FMC2_RESOURCE_CFGR) == 0) {
@@ -1007,7 +1007,7 @@ int stm32_fmc2_init(void)
 	clk_enable(stm32_fmc2.clock_id);
 
 	/* Reset IP */
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 	if ((info.reset >= 0) &&
 	    (stm32_fmc2_check_rif(FMC2_RESOURCE_CFGR) != -EACCES)) {
 #else
@@ -1026,7 +1026,7 @@ int stm32_fmc2_init(void)
 		}
 	}
 
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 	/* Check if FMC2 NAND controller can be used */
 	if (stm32_fmc2_check_rif(FMC2_RESOURCE_NAND) == 0) {
 		/* Secure the FMC2 NAND controller */

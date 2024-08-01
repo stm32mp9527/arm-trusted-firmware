@@ -28,7 +28,7 @@ enum stm32mp_ddr_reg_type {
 struct stm32mp_ddr_reg_desc {
 	uint16_t offset;	/* Offset for base address */
 	uint8_t par_offset;	/* Offset for parameter array */
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 	bool qd; /* quasi-dynamic register if true */
 #endif
 };

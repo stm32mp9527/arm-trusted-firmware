@@ -43,7 +43,7 @@ void stm32mp_ddr_set_reg(const struct stm32mp_ddr_priv *priv, enum stm32mp_ddr_r
 			ERROR("invalid parameter offset\n");
 			panic();
 		} else {
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 			if (desc[i].qd) {
 				stm32mp_ddr_start_sw_done(priv->ctl);
 			}
@@ -51,7 +51,7 @@ void stm32mp_ddr_set_reg(const struct stm32mp_ddr_priv *priv, enum stm32mp_ddr_r
 			value = *((uint32_t *)((uintptr_t)param +
 					       desc[i].par_offset));
 			mmio_write_32(ptr, value);
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 			if (desc[i].qd) {
 				stm32mp_ddr_wait_sw_done_ack(priv->ctl);
 			}

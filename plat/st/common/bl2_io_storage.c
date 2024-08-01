@@ -30,10 +30,10 @@
 #include <drivers/spi_nand.h>
 #include <drivers/spi_nor.h>
 #include <drivers/st/stm32_fmc2_nand.h>
-#if STM32MP13 || STM32MP15
+#ifdef STM32MP1X
 #include <drivers/st/stm32_qspi.h>
 #endif
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 #include <drivers/st/stm32_ospi.h>
 #endif
 #include <drivers/st/stm32_sdmmc2.h>
@@ -323,10 +323,10 @@ static void boot_spi_nor(boot_api_context_t *boot_context)
 {
 	int io_result __maybe_unused = 0;
 
-#if STM32MP13 || STM32MP15
+#ifdef STM32MP1X
 	io_result = stm32_qspi_init();
 #endif
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 	io_result = stm32_ospi_init();
 #endif
 
@@ -369,10 +369,10 @@ static void boot_spi_nand(boot_api_context_t *boot_context)
 {
 	int io_result __maybe_unused = 0;
 
-#if STM32MP13 || STM32MP15
+#ifdef STM32MP1X
 	io_result = stm32_qspi_init();
 #endif
-#if STM32MP21 || STM32MP23 || STM32MP25
+#ifdef STM32MP2X
 	io_result = stm32_ospi_init();
 #endif
 	assert(io_result == 0);
