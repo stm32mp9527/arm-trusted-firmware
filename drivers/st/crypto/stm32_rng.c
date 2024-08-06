@@ -235,6 +235,7 @@ int stm32_rng_init(void)
 	void *fdt;
 	int node;
 	int success = 0;
+	int disabled = 0;
 
 	if (stm32_rng.base != 0U) {
 		if(stm32_rng.clock != 0U) {
@@ -263,6 +264,7 @@ int stm32_rng_init(void)
 		 * instance of the driver.
 		 */
 		if ((dt_rng.status == DT_DISABLED) || (dt_rng.base == 0U)) {
+			disabled++;
 			continue;
 		}
 
@@ -303,12 +305,15 @@ int stm32_rng_init(void)
 		}
 	}
 
-	if (success > 0) {
+	if ((success == 0) && (disabled > 0)) {
+		WARN("%s: No RNG found in device tree.\n", __func__);
+		return 0;
+	} else if (success > 0) {
 		if ((rng.clock != 0U) && (rng.base != 0U)) {
 			stm32_rng = rng;
 		}
 		return 0;
+	} else {
+		return -ENODEV;
 	}
-
-	return -ENODEV;
 }
