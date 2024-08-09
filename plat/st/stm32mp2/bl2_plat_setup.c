@@ -765,6 +765,9 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 
 void bl2_el3_plat_prepare_exit(void)
 {
+	if (stm32_rifsc_semaphore_exit() != 0) {
+		panic();
+	}
 	flush_dcache_range(BSS_START, BSS_END - BSS_START);
 	flush_dcache_range(DATA_START, DATA_END - DATA_START);
 
