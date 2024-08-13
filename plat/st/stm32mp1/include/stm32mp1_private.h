@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2023, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015-2024, ARM Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -61,6 +61,11 @@ static inline uint32_t stm32_otp_set_sr_lock(uint32_t otp)
 static inline uint32_t stm32_otp_read_sw_lock(uint32_t otp, bool *value)
 {
 	return bsec_read_sw_lock(otp, value);
+}
+
+static inline uint32_t otp_mirror_read(uint32_t *val, uint32_t otp)
+{
+	return BSEC_ERROR;
 }
 
 #endif /* STM32MP1_PRIVATE_H */
