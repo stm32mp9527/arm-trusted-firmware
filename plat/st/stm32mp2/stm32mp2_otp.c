@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2023-2024, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -38,5 +38,9 @@ uint32_t stm32_otp_read_sw_lock(uint32_t otp, bool *value)
 
 bool stm32_otp_is_closed_device(void)
 {
-	return false;
+	/*
+	 * As we cannot check BSEC status, return true here and only rely on lifecycle OTP
+	 * to check the device is closed in stm32mp_check_closed_device().
+	 */
+	return true;
 }
