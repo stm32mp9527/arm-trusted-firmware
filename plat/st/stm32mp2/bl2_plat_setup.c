@@ -406,6 +406,19 @@ void bl2_el3_plat_arch_setup(void)
 		panic();
 	}
 
+#if STM32MP_DDR_FIP_IO_STORAGE || TRUSTED_BOARD_BOOT
+#if !STM32MP_M33_TDCID
+	/*
+	 * RISAB3 setup (dedicated for SRAM1)
+	 *
+	 * Allow secure read/writes data accesses to non-secure
+	 * blocks or pages, all RISAB registers are writable.
+	 * DDR firmwares are saved there before being loaded in DDRPHY memory.
+	 */
+	mmio_write_32(RISAB3_BASE + RISAB_CR, RISAB_CR_SRWIAD);
+#endif
+#endif /* STM32MP_DDR_FIP_IO_STORAGE || TRUSTED_BOARD_BOOT */
+
 	if (stm32_tamp_nvram_init() < 0) {
 		panic();
 	}
@@ -491,19 +504,6 @@ skip_console_init:
 	}
 
 	fconf_populate("TB_FW", STM32MP_DTB_BASE);
-
-#if STM32MP_DDR_FIP_IO_STORAGE || TRUSTED_BOARD_BOOT
-#if !STM32MP_M33_TDCID
-	/*
-	 * RISAB3 setup (dedicated for SRAM1)
-	 *
-	 * Allow secure read/writes data accesses to non-secure
-	 * blocks or pages, all RISAB registers are writable.
-	 * DDR firmwares are saved there before being loaded in DDRPHY memory.
-	 */
-	mmio_write_32(RISAB3_BASE + RISAB_CR, RISAB_CR_SRWIAD);
-#endif
-#endif /* STM32MP_DDR_FIP_IO_STORAGE || TRUSTED_BOARD_BOOT */
 
 #if STM32MP_USB_PROGRAMMER
 #if STM32MP21
