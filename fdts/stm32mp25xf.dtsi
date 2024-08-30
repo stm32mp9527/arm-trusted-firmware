@@ -31,7 +31,7 @@
 		};
 
 		pka: pka@42060000 {
-			compatible = "st,stm32-pka64";
+			compatible = "st,stm32mp13-pka64";
 			reg = <0x42060000 0x2000>;
 			clocks = <&rcc CK_BUS_PKA>;
 			resets = <&rcc PKA_R>;
