@@ -108,17 +108,10 @@
 #define BOOT_API_ECDSA_SIGNATURE_384_LEN_IN_BYTES		96
 #define BOOT_API_SHA384_DIGEST_SIZE_IN_BYTES			48
 
-#if STM32MP21
-#define BOOT_API_ECDSA_PUB_KEY_LEN_IN_BYTES			\
-	BOOT_API_ECDSA_PUB_KEY_384_LEN_IN_BYTES
-#define BOOT_API_ECDSA_SIGNATURE_LEN_IN_BYTES			\
-	BOOT_API_ECDSA_SIGNATURE_384_LEN_IN_BYTES
-#else /* !STM32MP21 */
 #define BOOT_API_ECDSA_PUB_KEY_LEN_IN_BYTES			\
 	BOOT_API_ECDSA_PUB_KEY_256_LEN_IN_BYTES
 #define BOOT_API_ECDSA_SIGNATURE_LEN_IN_BYTES			\
 	BOOT_API_ECDSA_SIGNATURE_256_LEN_IN_BYTES
-#endif /* STM32MP21 */
 
 /* Possible values of the field 'boot_api_image_header_t.ecc_algo_type' */
 #define BOOT_API_ECDSA_ALGO_TYPE_P256NIST			1
@@ -335,7 +328,11 @@ typedef struct {
 typedef struct {
 	/* BOOT_API_IMAGE_HEADER_MAGIC_NB */
 	uint32_t magic;
-	uint8_t image_signature[BOOT_API_ECDSA_SIGNATURE_LEN_IN_BYTES];
+#if STM32MP21
+	uint8_t image_signature[BOOT_API_ECDSA_SIGNATURE_384_LEN_IN_BYTES];
+#else /* STM32MP21 */
+	uint8_t image_signature[BOOT_API_ECDSA_SIGNATURE_256_LEN_IN_BYTES];
+#endif /* STM32MP21 */
 	/*
 	 * Checksum of payload
 	 * 32-bit sum all payload bytes considered as 8 bit unsigned
@@ -416,11 +413,13 @@ typedef struct {
 	 */
 	uint32_t ecc_algo_type;
 	/* ECDSA public key to be used to check signature. */
-	uint8_t ecc_pubk[BOOT_API_ECDSA_PUB_KEY_LEN_IN_BYTES];
+
 	/* table of Hash of Algo+ECDSA public key */
 #if STM32MP21
+	uint8_t ecc_pubk[BOOT_API_ECDSA_PUB_KEY_384_LEN_IN_BYTES];
 	boot_api_sha384_t pk_hashes[];
 #else /* STM32MP21 */
+	uint8_t ecc_pubk[BOOT_API_ECDSA_PUB_KEY_256_LEN_IN_BYTES];
 	boot_api_sha256_t pk_hashes[];
 #endif /* STM32MP21 */
 } __packed boot_ext_header_params_authentication_t;
