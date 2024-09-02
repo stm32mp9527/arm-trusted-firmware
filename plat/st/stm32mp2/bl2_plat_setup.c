@@ -381,11 +381,6 @@ void bl2_el3_plat_arch_setup(void)
 
 	configure_mmu();
 
-	/* Prevent corruption of preloaded Device Tree */
-	mmap_add_dynamic_region(DTB_BASE, DTB_BASE,
-				DTB_LIMIT - DTB_BASE,
-				MT_RO_DATA | MT_SECURE);
-
 	if (dt_open_and_check(STM32MP_DTB_BASE) < 0) {
 		panic();
 	}
@@ -706,8 +701,11 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 			panic();
 		}
 #endif
-		mmap_remove_dynamic_region(DTB_BASE, DTB_LIMIT - DTB_BASE);
-		inv_dcache_range(DTB_BASE, DTB_LIMIT - DTB_BASE);
+
+		/*
+		 * After this step, the BL2 device tree area will be overwritten
+		 * with BL31 binary, no other data should be read from BL2 DT.
+		 */
 
 		break;
 
