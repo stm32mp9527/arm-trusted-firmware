@@ -93,6 +93,15 @@ static inline bool stm32_otp_is_closed_device(void)
 {
 	return bsec_mode_is_closed_device();
 }
+
+static inline bool stm32_otp_is_hwkey_valid(void)
+{
+	if ((bsec_get_secure_state() & BSEC_HARDWARE_KEY) != 0U) {
+		return true;
+	}
+
+	return false;
+}
 #else /* STM32MP_M33_TDCID */
 uint32_t stm32_otp_probe(void);
 uint32_t stm32_otp_read(uint32_t *val, uint32_t otp);
