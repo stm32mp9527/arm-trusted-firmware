@@ -49,6 +49,9 @@
 #define RIF_UNLOCK		0x0
 #define RIF_LOCK		0x1
 
+/* Used when a field in a macro has no impact */
+#define RIF_UNUSED		0x0
+
 #define RIFPROT(rifid, sem_list, sec, priv, scid, sem_en, cfen) \
 	(((rifid) << 24) | ((sem_list) << 16) | ((priv) << 9) | ((sec) << 8) | ((scid) << 4) | \
 	 ((sem_en) << 1) | (cfen))
