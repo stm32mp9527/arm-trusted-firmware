@@ -446,14 +446,14 @@ void bl2_el3_plat_arch_setup(void)
 
 	stm32_save_boot_info(boot_context);
 
+	/* Masking potential tamper during BL2 */
+	stm32mp_syscfg_mask_potential_tamper_enable();
+
 	if (stm32mp_uart_console_setup() != 0) {
 		goto skip_console_init;
 	}
 
 	iac_dump();
-
-	/* Masking potential tamper during BL2 */
-	stm32mp_syscfg_mask_potential_tamper_enable();
 
 	stm32mp_print_cpuinfo();
 
