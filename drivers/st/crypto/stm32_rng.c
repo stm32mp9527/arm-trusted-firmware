@@ -149,6 +149,32 @@ static int stm32_rng_enable(void)
 	return 0;
 }
 
+static int check_data_validity(void)
+{
+	int nb_tries = RNG_TIMEOUT_US / RNG_TIMEOUT_STEP_US;
+	uint32_t status = mmio_read_32(stm32_rng.base + RNG_SR);
+
+	/* Exit if data is ready without any seed error */
+	if ((status & (RNG_SR_SECS | RNG_SR_SEIS | RNG_SR_DRDY)) != RNG_SR_DRDY) {
+		do {
+
+			if ((status & (RNG_SR_SECS | RNG_SR_SEIS)) != 0U) {
+				seed_error_recovery();
+			}
+
+			udelay(RNG_TIMEOUT_STEP_US);
+			nb_tries--;
+			if (nb_tries == 0) {
+				return -ETIMEDOUT;
+			}
+
+			status = mmio_read_32(stm32_rng.base + RNG_SR);
+		} while ((status & RNG_SR_DRDY) == 0U);
+	}
+
+	return 0;
+}
+
 /*
  * stm32_rng_read - Read a number of random bytes from RNG
  * out: pointer to the output buffer
@@ -159,7 +185,6 @@ int stm32_rng_read(uint8_t *out, uint32_t size)
 {
 	uint8_t *buf = out;
 	size_t len = size;
-	int nb_tries;
 	uint32_t data32;
 	int rc = 0;
 	unsigned int count;
@@ -169,22 +194,10 @@ int stm32_rng_read(uint8_t *out, uint32_t size)
 	}
 
 	while (len != 0U) {
-		nb_tries = RNG_TIMEOUT_US / RNG_TIMEOUT_STEP_US;
-		do {
-			uint32_t status = mmio_read_32(stm32_rng.base + RNG_SR);
-
-			if ((status & (RNG_SR_SECS | RNG_SR_SEIS)) != 0U) {
-				seed_error_recovery();
-			}
-
-			udelay(RNG_TIMEOUT_STEP_US);
-			nb_tries--;
-			if (nb_tries == 0) {
-				rc = -ETIMEDOUT;
-				goto bail;
-			}
-		} while ((mmio_read_32(stm32_rng.base + RNG_SR) &
-			  RNG_SR_DRDY) == 0U);
+		rc = check_data_validity();
+		if (rc != 0) {
+			goto bail;
+		}
 
 		count = 4U;
 		while (len != 0U) {
@@ -193,6 +206,16 @@ int stm32_rng_read(uint8_t *out, uint32_t size)
 			}
 
 			data32 = mmio_read_32(stm32_rng.base + RNG_DR);
+
+			while (data32 == 0U) {
+				rc = check_data_validity();
+				if (rc != 0) {
+					goto bail;
+				}
+
+				data32 = mmio_read_32(stm32_rng.base + RNG_DR);
+			}
+
 			count--;
 
 			(void)memcpy(buf, (uint8_t *)&data32, MIN(len, sizeof(uint32_t)));
