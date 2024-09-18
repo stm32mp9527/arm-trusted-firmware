@@ -338,15 +338,15 @@ enum ddr_type {
 #define EXTI1_C1IMR2			U(0x90)
 #define EXTI1_C1IMR3			U(0xA0)
 
-#define EXTI1_C1IMR1_PVD		BIT(16)
-#define EXTI1_C1IMR1_PVM		BIT(17)
+#define EXTI1_C1IMR1_PVD		BIT_32(16)
+#define EXTI1_C1IMR1_PVM		BIT_32(17)
 
-#define EXTI1_C1IMR2_WKUP1		BIT(52 - 32)
-#define EXTI1_C1IMR2_WKUP2		BIT(53 - 32)
-#define EXTI1_C1IMR2_WKUP3		BIT(54 - 32)
-#define EXTI1_C1IMR2_WKUP4		BIT(55 - 32)
-#define EXTI1_C1IMR2_WKUP5		BIT(56 - 32)
-#define EXTI1_C1IMR2_WKUP6		BIT(57 - 32)
+#define EXTI1_C1IMR2_WKUP1		BIT_32(52 - 32)
+#define EXTI1_C1IMR2_WKUP2		BIT_32(53 - 32)
+#define EXTI1_C1IMR2_WKUP3		BIT_32(54 - 32)
+#define EXTI1_C1IMR2_WKUP4		BIT_32(55 - 32)
+#define EXTI1_C1IMR2_WKUP5		BIT_32(56 - 32)
+#define EXTI1_C1IMR2_WKUP6		BIT_32(57 - 32)
 
 #define EXTI1_C1IMR2_WKUP_MASK		GENMASK_32(57 - 32, 52 - 32)
 
@@ -500,13 +500,13 @@ enum ddr_type {
 #define PACKAGE_OTP_PKG_SHIFT			0
 
 /* IWDG OTP */
-#define HCONF1_OTP_IWDG_HW_MASK(i)		BIT((i) * 3U)
-#define HCONF1_OTP_IWDG_FZ_STOP_MASK(i)		BIT((i) * 3U + 1U)
-#define HCONF1_OTP_IWDG_FZ_STANDBY_MASK(i)	BIT((i) * 3U + 2U)
+#define HCONF1_OTP_IWDG_HW_MASK(i)		BIT_32((i) * 3U)
+#define HCONF1_OTP_IWDG_FZ_STOP_MASK(i)		BIT_32((i) * 3U + 1U)
+#define HCONF1_OTP_IWDG_FZ_STANDBY_MASK(i)	BIT_32((i) * 3U + 2U)
 
 /* NAND OTP */
 /* NAND parameter storage flag */
-#define NAND_PARAM_STORED_IN_OTP		BIT(31)
+#define NAND_PARAM_STORED_IN_OTP		BIT_32(31)
 
 /* NAND page size in bytes */
 #define NAND_PAGE_SIZE_MASK			GENMASK_32(30, 29)
@@ -528,7 +528,7 @@ enum ddr_type {
 #define NAND_BLOCK_NB_UNIT			U(256)
 
 /* NAND bus width in bits */
-#define NAND_WIDTH_MASK				BIT(18)
+#define NAND_WIDTH_MASK				BIT_32(18)
 #define NAND_WIDTH_SHIFT			18
 
 /* NAND number of ECC bits per 512 bytes */
@@ -541,13 +541,13 @@ enum ddr_type {
 #define NAND_ECC_ON_DIE				U(4)
 
 /* NAND number of planes */
-#define NAND_PLANE_BIT_NB_MASK			BIT(14)
+#define NAND_PLANE_BIT_NB_MASK			BIT_32(14)
 
 /* NAND2 OTP */
 #define NAND2_PAGE_SIZE_SHIFT			16
 
 /* NAND2 config distribution */
-#define NAND2_CONFIG_DISTRIB			BIT(0)
+#define NAND2_CONFIG_DISTRIB			BIT_32(0)
 #define NAND2_PNAND_NAND2_SNAND_NAND1		U(0)
 #define NAND2_PNAND_NAND1_SNAND_NAND2		U(1)
 
@@ -578,7 +578,7 @@ enum ddr_type {
 #define TAMP_SCR			U(0x3C)
 #define TAMP_COUNTR			U(0x40)
 
-#define TAMP_SR_LSE_MONITORING		BIT(18)
+#define TAMP_SR_LSE_MONITORING		BIT_32(18)
 
 /*******************************************************************************
  * STM32MP2 USB
