@@ -17,14 +17,6 @@
 #include <platform_def.h>
 #include <stm32mp2_context.h>
 
-#if STM32MP_DDR_FIP_IO_STORAGE && defined(IMAGE_BL2)
-/* Map the whole SRAM1 as secure, required to load DDR FW from FIP */
-#define SRAM1_MAP_SIZE	SRAM1_SIZE_FOR_TFA
-#else
-/* Map the beginning of SRAM1 as secure */
-#define SRAM1_MAP_SIZE	STM32MP_SEC_SRAM1_SIZE
-#endif
-
 #define MAP_SYSRAM	MAP_REGION_FLAT(STM32MP_SYSRAM_BASE, \
 					STM32MP_SYSRAM_SIZE, \
 					MT_MEMORY | \
@@ -58,12 +50,25 @@
 					MT_EXECUTE_NEVER)
 #endif /* STM32MP_USB_PROGRAMMER && !STM32MP21 */
 
+#if STM32MP_DDR_FIP_IO_STORAGE && defined(IMAGE_BL2)
+/* Map the whole SRAM1 allocated to TF-A as secure, required to load DDR FW from FIP */
 #define MAP_SRAM1	MAP_REGION_FLAT(SRAM1_BASE, \
-					SRAM1_MAP_SIZE, \
+					SRAM1_SIZE_FOR_TFA, \
 					MT_MEMORY | \
 					MT_RW | \
 					MT_SECURE | \
 					MT_EXECUTE_NEVER)
+#endif
+
+#if STM32MP_M33_TDCID
+#define MAP_BSEC_MIRROR	MAP_REGION_FLAT(STM32MP_BSEC_MIRROR_BASE, \
+					STM32MP_BSEC_MIRROR_SIZE, \
+					MT_RO_DATA | MT_NS)
+#else
+#define MAP_BSEC_MIRROR	MAP_REGION_FLAT(STM32MP_BSEC_MIRROR_BASE, \
+					STM32MP_BSEC_MIRROR_SIZE, \
+					MT_RO_DATA | MT_SECURE)
+#endif
 
 #define MAP_DEVICE	MAP_REGION_FLAT(STM32MP_DEVICE_BASE, \
 					STM32MP_DEVICE_SIZE, \
@@ -80,7 +85,11 @@ static const mmap_region_t stm32mp2_mmap[] = {
 #else /* !STM32MP_USB_PROGRAMMER || STM32MP21 */
 	MAP_SYSRAM,
 #endif /* STM32MP_USB_PROGRAMMER && !STM32MP21 */
+#if STM32MP_DDR_FIP_IO_STORAGE
 	MAP_SRAM1,
+#else
+	MAP_BSEC_MIRROR,
+#endif
 	MAP_DEVICE,
 	{0}
 };
@@ -88,7 +97,7 @@ static const mmap_region_t stm32mp2_mmap[] = {
 #if defined(IMAGE_BL31)
 static const mmap_region_t stm32mp2_mmap[] = {
 	MAP_SEC_SYSRAM,
-	MAP_SRAM1,
+	MAP_BSEC_MIRROR,
 	MAP_DEVICE,
 	{0}
 };
