@@ -38,6 +38,20 @@
 #define DEFAULT_LPLVDLY_D2	0U		/* 6xLSI cycle = 187 us */
 #define DEFAULT_LPSTOP1DLY	100U		/* LP-Stop1 PWRLP_DLY to wait VTT */
 
+/* Standardized status and control registers (SSC) access modes */
+#define A35SSC_SSC_RW			U(0x0)
+#define A35SSC_SSC_WS1			U(0x4)
+#define A35SSC_SSC_WC1			U(0x8)
+#define A35SSC_SSC_WT1			U(0xC)
+
+#define CA35SS_SSC_LPI_TSGEN_NTS(type)	(U(0x0D0) + A35SSC_SSC_ ## type)
+#define TS_CSYSREQ			BIT_32(8)
+#define TS_CSYSACK			BIT_32(9)
+
+#define CA35SS_SSC_LPI_STGEN_NTS(type)	(U(0x140) + A35SSC_SSC_ ## type)
+#define STGEN_CSYSREQ			BIT_32(24)
+#define STGEN_CSYSACK			BIT_32(25)
+
 #define CA35SS_SYSCFG_VBAR_CR	0x2084U
 
 #define RAMCFG_RETRAMCR		0x180U
@@ -187,6 +201,41 @@ static void stm32mp_state_set(unsigned int core_id, unsigned int state_id, bool 
 	flush_dcache_range((uintptr_t)&stm32_percpu_data[core_id], sizeof(stm32_percpu_data[0]));
 	if (spin_lock_available) {
 		spin_unlock(&stm32mp_state_lock);
+	}
+}
+
+/*
+ * To guarantee a correct synchronization of the ARM counter with STGEN,
+ * the ARM generic timer has to  be isolated before entering in low power
+ * mode. Once this is done, the delays or timeouts function based on this
+ * timer will never end.
+ */
+static void stm32mp_ca35_lpi_isolate(void)
+{
+	/* Use write clear registers to clear bits */
+	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1), TS_CSYSREQ);
+	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1), STGEN_CSYSREQ);
+
+	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1)) & TS_CSYSACK) != 0U) {
+		;
+	}
+
+	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1)) & STGEN_CSYSACK) != 0U) {
+		;
+	}
+}
+
+static void stm32mp_ca35_lpi_restore(void)
+{
+	/* Use write set registers to set bits */
+	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1), TS_CSYSREQ);
+	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1), STGEN_CSYSREQ);
+
+	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1)) & TS_CSYSACK) == 0U) {
+		;
+	}
+	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1)) & STGEN_CSYSACK) == 0U) {
+		;
 	}
 }
 
@@ -529,6 +578,8 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 		break;
 	}
 
+	stm32mp_ca35_lpi_isolate();
+
 	/* Clear previous status */
 	mmio_setbits_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_CSSF);
 	if (!cpu2_running) {
@@ -635,6 +686,7 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 	case PWRSTATE_LP_STOP1:
 	case PWRSTATE_LPLV_STOP1:
 		VERBOSE("STOP1 exit\n");
+		stm32mp_ca35_lpi_restore();
 		/* Exit DDR self refresh mode after STOP mode */
 		ddr_sr_exit();
 		ddr_restore_sr_mode();
