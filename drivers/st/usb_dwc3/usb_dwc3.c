@@ -1532,27 +1532,27 @@ static uint8_t dwc3_get_dev_speed(dwc3_handle_t *dwc3_handle)
 	switch (reg) {
 	case DWC3_DSTS_SUPERSPEED:
 		ret = USB_DWC3_SPEED_SUPER;
-		NOTICE("%s = SuperSpeed\n", __func__);
+		INFO("%s = SuperSpeed\n", __func__);
 		break;
 	case DWC3_DSTS_HIGHSPEED:
 		ret = USB_DWC3_SPEED_HIGH;
-		NOTICE("%s = HighSpeed\n", __func__);
+		INFO("%s = HighSpeed\n", __func__);
 		break;
 	case DWC3_DSTS_FULLSPEED1:
 		ret = USB_DWC3_SPEED_FULL_48;
-		NOTICE("%s = FullSpeed_48M\n", __func__);
+		INFO("%s = FullSpeed_48M\n", __func__);
 		break;
 	case DWC3_DSTS_FULLSPEED2:
 		ret = USB_DWC3_SPEED_FULL;
-		NOTICE("%s = FullSpeed\n", __func__);
+		INFO("%s = FullSpeed\n", __func__);
 		break;
 	case DWC3_DSTS_LOWSPEED:
 		ret = USB_DWC3_SPEED_LOW;
-		NOTICE("%s = LowSpeed\n", __func__);
+		INFO("%s = LowSpeed\n", __func__);
 		break;
 	default: /* Invalid */
 		ret = USB_DWC3_SPEED_INVALID;
-		NOTICE("%s = Invalid\n", __func__);
+		INFO("%s = Invalid\n", __func__);
 		break;
 	}
 
@@ -1989,7 +1989,7 @@ static enum usb_status dwc3_core_init(dwc3_handle_t *dwc3_handle, uint32_t phy_i
 {
 	enum usb_status ret;
 
-	NOTICE("Core ID %08x\n", (uint32_t)DWC3_regread(dwc3_handle->usb_global, DWC3_GSNPSID));
+	VERBOSE("Core ID %08x\n", (uint32_t)DWC3_regread(dwc3_handle->usb_global, DWC3_GSNPSID));
 
 	/* Set GUSB3PIPECTL for all USB3 ports (1-n), currently doing only for 0 */
 	if ((phy_itface & USB3PHY_MASK) != 0U) {
