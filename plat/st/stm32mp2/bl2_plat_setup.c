@@ -24,6 +24,7 @@
 #include <drivers/st/stm32_rifsc.h>
 #include <drivers/st/stm32_rng.h>
 #include <drivers/st/stm32_saes.h>
+#include <drivers/st/stm32_uart.h>
 #include <drivers/st/stm32mp_pmic2.h>
 #include <drivers/st/stm32mp_reset.h>
 #include <drivers/st/stm32mp_risab_regs.h>
@@ -284,6 +285,10 @@ void bl2_el3_plat_arch_setup(void)
 	const char *board_model;
 	boot_api_context_t *boot_context =
 		(boot_api_context_t *)stm32mp_get_boot_ctx_address();
+	bool serial_uart_interface __unused =
+				(boot_context->boot_interface_selected ==
+				 BOOT_API_CTX_BOOT_INTERFACE_SEL_SERIAL_UART);
+	uintptr_t uart_prog_addr __unused;
 
 	if (stm32_otp_probe() != 0) {
 		panic();
@@ -321,6 +326,15 @@ void bl2_el3_plat_arch_setup(void)
 	if (stm32_tamp_nvram_init() < 0) {
 		panic();
 	}
+
+#if STM32MP_UART_PROGRAMMER
+	uart_prog_addr = get_uart_address(boot_context->boot_interface_instance);
+
+	/* Disable programmer UART before changing clock tree */
+	if (serial_uart_interface) {
+		stm32_uart_stop(uart_prog_addr);
+	}
+#endif
 
 	if (stm32_iwdg_init() < 0) {
 		panic();
