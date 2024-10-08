@@ -88,9 +88,11 @@ uintptr_t stm32_sec_entrypoint;
 
 static u_register_t saved_scr_el3;
 
+#if !STM32MP_M33_TDCID
 static uint32_t lpstop1_pwrlpdly;
+#endif
 
-#if !STM32MP21
+#if !STM32MP21 && !STM32MP_M33_TDCID
 /* bitfield to indicate the modified AMEN bit for LP-SRAM1/2/3 */
 static uint32_t saved_lpsram_amen;
 #endif
@@ -257,7 +259,8 @@ static void stm32mp_ca35_lpi_restore(void)
 /* LPSRAM1/2/3 autonomous support (AMEN) when D3 is used in low power */
 static void lpsram_autonomous_mode_set(uintptr_t rcc_base)
 {
-#if !STM32MP21 /* STM32MP21 Series don't have D3 domain */
+        /* STM32MP21 Series don't have D3 domain */
+#if !STM32MP21 && !STM32MP_M33_TDCID
 	const uint32_t mask = RCC_C3CFGR_C3EN | RCC_C3CFGR_C3AMEN;
 
 	/* configure LPSRAM only when C3 is used in autonoumous mode */
@@ -289,12 +292,12 @@ static void lpsram_autonomous_mode_set(uintptr_t rcc_base)
 				RCC_LPSRAM3CFGR_LPSRAM3AMEN);
 		saved_lpsram_amen |=  BIT(2);
 	}
-#endif /* !STM32MP21 */
+#endif /* !STM32MP21 && !STM32MP_M33_TDCID */
 }
 
 static void lpsram_autonomous_mode_restore(uintptr_t rcc_base)
 {
-#if !STM32MP21
+#if !STM32MP21 && !STM32MP_M33_TDCID
 	if (saved_lpsram_amen & BIT(0))
 		mmio_clrbits_32(rcc_base + RCC_LPSRAM1CFGR,
 				RCC_LPSRAM1CFGR_LPSRAM1AMEN);
@@ -306,7 +309,7 @@ static void lpsram_autonomous_mode_restore(uintptr_t rcc_base)
 				RCC_LPSRAM3CFGR_LPSRAM3AMEN);
 
 	saved_lpsram_amen = 0U;
-#endif /* !STM32MP21 */
+#endif /* !STM32MP21 && !STM32MP_M33_TDCID */
 }
 
 /*******************************************************************************
@@ -459,7 +462,11 @@ static bool stm32_freeze_other_core(unsigned int core_id)
 
 bool stm32_pwr_cpu2_state_is_running(uintptr_t pwr_base)
 {
+#if STM32MP_M33_TDCID
+	return true;
+#else
 	return (mmio_read_32(pwr_base + PWR_CPU2D2SR) & PWR_CPU2D2SR_CSTATE_MASK) != 0U;
+#endif
 }
 
 bool stm32_pwr_cpu3_state_is_running(uintptr_t pwr_base)
@@ -527,7 +534,7 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 {
 	uintptr_t pwr_base = stm32mp_pwr_base();
 	uintptr_t rcc_base = stm32mp_rcc_base();
-	bool standby = false;
+	bool standby __maybe_unused = false;
 	uint32_t stateid = stm32_get_stateid(target_state->pwr_domain_state);
 	bool cpu2_running = stm32_pwr_cpu2_state_is_running(pwr_base);
 	uint32_t pwr_r3cidcfgr = 0U;
@@ -554,6 +561,7 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 	/* Request STOP for both cores */
 	mmio_write_32(rcc_base + RCC_C1SREQSETR, RCC_C1SREQSETR_STPREQ_MASK);
 
+#if !STM32MP_M33_TDCID
 	/*
 	 * No PWR_LP delay by default, because VTT_DRR is not stopped (for Stop1)
 	 * or VTT ramp-up delay is masked by VDD CPU delay (for other modes except LP-Stop1).
@@ -575,6 +583,7 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 
 	/* Disable DDRSHR to avoid STANDBY/STOP exit issue */
 	mmio_clrbits_32(rcc_base + RCC_DDRITFCFGR, RCC_DDRITFCFGR_DDRSHR);
+#endif
 
 	if (!cpu2_running) {
 		/* Filtering for CID1 = CA35 on PWR resource 3 = PWR_CPU2CR */
@@ -600,8 +609,10 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 		if (!cpu2_running) {
 			mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2);
 		}
+#if !STM32MP_M33_TDCID
 		/* Wait VTT ramp-up delay for LP-Stop1 */
 		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, lpstop1_pwrlpdly);
+#endif
 		stm32mp2_enable_rcc_wakeup_irq(rcc_base);
 		break;
 
@@ -676,9 +687,10 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 		/* Restore RIF config for resource 3 = PWR_CPU2CR */
 		mmio_write_32(pwr_base + PWR_R3CIDCFGR, pwr_r3cidcfgr);
 	}
-#if !STM32MP21
+
+#if !STM32MP21 && !STM32MP_M33_TDCID
 	mmio_setbits_32(pwr_base + PWR_CPU3CR, PWR_CPU3CR_CSSF);
-#endif /* !STM32MP21 */
+#endif /* !STM32MP21 && !STM32MP_M33_TDCID */
 
 	/* Enable the Non-secure interrupt to wake up the CPU with WFI for pending interrupt */
 	saved_scr_el3 = read_scr_el3();
@@ -737,15 +749,19 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 
 	mmio_write_32(rcc_base + RCC_C1SREQCLRR, RCC_C1SREQCLRR_STPREQ_MASK);
 
+#if !STM32MP_M33_TDCID
 	/* Restore DDRSHR after STANDBY/STOP exit issue */
 	mmio_setbits_32(rcc_base + RCC_DDRITFCFGR, RCC_DDRITFCFGR_DDRSHR);
+#endif
 
 	/* Perform the common system specific operations */
 	switch (stateid) {
 	case PWRSTATE_STANDBY:
 		VERBOSE("STANDBY exit\n");
+#if !STM32MP_M33_TDCID
 		/* Restore the DDR self refresh mode */
 		ddr_restore_sr_mode();
+#endif
 		break;
 	case PWRSTATE_STOP2:
 	case PWRSTATE_LP_STOP2:
@@ -756,9 +772,11 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 		/* restore PLL1 configuration for CA35 */
 		stm32mp2_pll1_enable();
 
+#if !STM32MP_M33_TDCID
 		/* Exit DDR self refresh mode after STOP mode */
 		ddr_sr_exit();
 		ddr_restore_sr_mode();
+#endif
 
 		stm32mp_gic_resume();
 		stm32mp_gic_cpuif_enable();
@@ -780,9 +798,11 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 	case PWRSTATE_LPLV_STOP1:
 		VERBOSE("STOP1 exit\n");
 		stm32mp_ca35_lpi_restore();
+#if !STM32MP_M33_TDCID
 		/* Exit DDR self refresh mode after STOP mode */
 		ddr_sr_exit();
 		ddr_restore_sr_mode();
+#endif
 		stm32mp2_disable_rcc_wakeup_irq(rcc_base);
 
 		/* the cpu suspend finish handler registered by the Secure
@@ -1299,6 +1319,7 @@ struct pm_param {
 	uint32_t lpstop1dly;
 };
 
+#if !STM32MP_M33_TDCID
 static void stm32_read_dt_pm_param(void *fdt, struct pm_param *param)
 {
 	int node;
@@ -1317,14 +1338,12 @@ static void stm32_read_dt_pm_param(void *fdt, struct pm_param *param)
 						    DEFAULT_LPSTOP1DLY);
 }
 
-static void stm32_pm_init(void *fdt)
+static void stm32_pm_tdcid_init(void *fdt)
 {
 	uintptr_t pwr_base = stm32mp_pwr_base();
 	uintptr_t rcc_base = stm32mp_rcc_base();
 	uint32_t lsmcu;
 	struct pm_param param;
-
-	stm32mp2_setup_rcc_wakeup_irq(rcc_base);
 
 	/* RCC init: DDR is shared by default */
 	mmio_setbits_32(rcc_base + RCC_DDRITFCFGR, RCC_DDRITFCFGR_DDRSHR);
@@ -1334,8 +1353,6 @@ static void stm32_pm_init(void *fdt)
 
 	/* Legacy mode: only CPU1 is allowed to boot, core1 is OFF */
 	mmio_setbits_32(rcc_base + RCC_LEGBOOTCR, RCC_LEGBOOTCR_LEGACY_BEN);
-
-	mmio_write_32(rcc_base + RCC_C1SREQCLRR, RCC_C1SREQSETR_STPREQ_MASK);
 
 #if STM32MP21
 	/* Maintain BKPSRAM & RETRAM content in Standby */
@@ -1369,6 +1386,21 @@ static void stm32_pm_init(void *fdt)
 	/* Compute RCC PWR LP DLY according to parent clock */
 	lsmcu = mmio_read_32(rcc_base + RCC_LSMCUDIVR) & RCC_LSMCUDIVR_LSMCUDIV;
 	lpstop1_pwrlpdly = PWRLPDLYCR_VAL(param.lpstop1dly, lsmcu);
+}
+#endif /* !STM32MP_M33_TDCID */
+
+static void stm32_pm_init(void *fdt)
+{
+	uintptr_t rcc_base = stm32mp_rcc_base();
+
+	stm32mp2_setup_rcc_wakeup_irq(rcc_base);
+
+	/* Clear CSleep and Stop request for CPU1 */
+	mmio_write_32(rcc_base + RCC_C1SREQCLRR, RCC_C1SREQSETR_STPREQ_MASK);
+
+#if !STM32MP_M33_TDCID
+	stm32_pm_tdcid_init(fdt);
+#endif
 }
 
 /*******************************************************************************
