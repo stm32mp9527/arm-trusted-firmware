@@ -171,6 +171,7 @@ void bl2_platform_setup(void)
 #endif
 }
 
+#if !STM32MP_M33_TDCID
 static void handle_potential_tamper(uint32_t bit_off)
 {
 	/* Fixme: Add implementation specific logic here */
@@ -202,7 +203,6 @@ static bool lse_tamper_detection(void)
 
 static void reset_backup_domain(void)
 {
-#if !STM32MP_M33_TDCID
 	uintptr_t pwr_base = stm32mp_pwr_base();
 	uintptr_t rcc_base = stm32mp_rcc_base();
 
@@ -235,11 +235,12 @@ static void reset_backup_domain(void)
 
 		mmio_clrbits_32(rcc_base + RCC_BDCR, RCC_BDCR_VSWRST);
 	}
-#endif
 }
+#endif /* !STM32MP_M33_TDCID */
 
 static void check_tamper_event(bool lse_tamper_occured)
 {
+#if !STM32MP_M33_TDCID
 	uint32_t sr = mmio_read_32(TAMP_BASE + TAMP_SR);
 
 	if (sr == 0U) {
@@ -250,8 +251,6 @@ static void check_tamper_event(bool lse_tamper_occured)
 	if (lse_tamper_occured) {
 		ERROR("** INTRUSION ALERT: LSE MONITORING TAMPER DETECTED **\n");
 		ERROR("\n");
-
-#if !STM32MP_M33_TDCID
 		/*
 		 * Fixme: Add logic to handle the LSE tamper here (e.g change RTC clock source
 		 * instead). This part is implementation specific.
@@ -259,7 +258,6 @@ static void check_tamper_event(bool lse_tamper_occured)
 		mmio_clrbits_32(RCC_BASE + RCC_BDCR, RCC_BDCR_RTCCKEN);
 		ERROR("** Rebooting... **\n");
 		stm32mp_system_reset();
-#endif
 	} else {
 		while (sr != 0U) {
 			unsigned int bit_off = __builtin_ctz(sr);
@@ -282,6 +280,7 @@ static void check_tamper_event(bool lse_tamper_occured)
 		}
 		ERROR("\n");
 	}
+#endif
 }
 
 static void authentication_check(boot_api_context_t *boot_context)
@@ -343,11 +342,11 @@ void bl2_el3_plat_arch_setup(void)
 		panic();
 	}
 
+#if !STM32MP_M33_TDCID
 	lse_tamper_occured = lse_tamper_detection();
 
 	reset_backup_domain();
 
-#if !STM32MP_M33_TDCID
 	/*
 	 * Initialize DDR sub-system clock. This needs to be done before enabling DDR PLL (PLL2),
 	 * and so before stm32mp2_clk_init().
