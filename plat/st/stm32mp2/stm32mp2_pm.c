@@ -452,6 +452,15 @@ bool stm32_pwr_cpu2_state_is_running(uintptr_t pwr_base)
 	return (mmio_read_32(pwr_base + PWR_CPU2D2SR) & PWR_CPU2D2SR_CSTATE_MASK) != 0U;
 }
 
+bool stm32_pwr_cpu3_state_is_running(uintptr_t pwr_base)
+{
+#if STM32MP21
+	return false;
+#else
+	return (mmio_read_32(pwr_base + PWR_CPU3D3SR) & PWR_CPU3D3SR_CSTATE_MASK) != 0U;
+#endif
+}
+
 static int stm32_pwr_domain_validate_suspend(const psci_power_state_t *target_state)
 {
 	uintptr_t pwr_base = stm32mp_pwr_base();
@@ -471,6 +480,16 @@ static int stm32_pwr_domain_validate_suspend(const psci_power_state_t *target_st
 		    stateid == PWRSTATE_LPLV_STOP2 ||
 		    stateid == PWRSTATE_LPLV_STOP1) {
 			WARN("Invalid PSCI power state %x with Cortex M33 running.\n", stateid);
+			return PSCI_E_INVALID_PARAMS;
+		}
+	}
+
+	/* If CPU3 is not in reset: limit supported low power modes */
+	if (stm32_pwr_cpu3_state_is_running(pwr_base)) {
+		if (stateid == PWRSTATE_STANDBY ||
+		    stateid == PWRSTATE_LPLV_STOP2 ||
+		    stateid == PWRSTATE_LPLV_STOP1) {
+			WARN("Invalid PSCI power state %x with Cortex M0 running.\n", stateid);
 			return PSCI_E_INVALID_PARAMS;
 		}
 	}
@@ -1096,6 +1115,12 @@ static void stm32_get_sys_suspend_power_state(psci_power_state_t *req_state)
 	if (stm32_pwr_cpu2_state_is_running(pwr_base)) {
 		max_pwr_state = PWRSTATE_LP_STOP2;
 		VERBOSE("%s: max_pwr_state = PWRSTATE_LP_STOP2, M33 is running\n", __func__);
+	}
+
+	/* M0 is running: Standby1 and LPLV are not allowed */
+	if (stm32_pwr_cpu3_state_is_running(pwr_base)) {
+		max_pwr_state = PWRSTATE_LP_STOP2;
+		VERBOSE("%s: max_pwr_state = PWRSTATE_LP_STOP2, M0 is running\n", __func__);
 	}
 
 	/* Trace to debug low power mode restriction */
