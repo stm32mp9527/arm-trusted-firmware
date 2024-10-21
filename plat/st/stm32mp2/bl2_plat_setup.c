@@ -454,14 +454,6 @@ skip_console_init:
 	}
 #endif
 
-	if (stm32_rifsc_check_peripheral_access() != 0) {
-		panic();
-	}
-
-	if (stm32_rifsc_semaphore_init() != 0) {
-		panic();
-	}
-
 #if !STM32MP_M33_TDCID
 	if (stm32_rng_init() != 0) {
 		panic();
@@ -749,9 +741,6 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 
 void bl2_el3_plat_prepare_exit(void)
 {
-	if (stm32_rifsc_semaphore_exit() != 0) {
-		panic();
-	}
 	flush_dcache_range(BSS_START, BSS_END - BSS_START);
 	flush_dcache_range(DATA_START, DATA_END - DATA_START);
 
