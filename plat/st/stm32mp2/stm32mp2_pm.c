@@ -217,29 +217,40 @@ static void stm32mp_state_set(unsigned int core_id, unsigned int state_id, bool 
 static void stm32mp_ca35_lpi_isolate(void)
 {
 	/* Use write clear registers to clear bits */
-	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1), TS_CSYSREQ);
 	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1), STGEN_CSYSREQ);
 
-	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1)) & TS_CSYSACK) != 0U) {
+	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1))
+		& STGEN_CSYSACK) != 0U) {
 		;
 	}
 
-	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1)) & STGEN_CSYSACK) != 0U) {
-		;
+	if (clk_is_enabled(CK_SYSDBG)) {
+		mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1), TS_CSYSREQ);
+
+		while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1))
+			& TS_CSYSACK) != 0U) {
+			;
+		}
 	}
 }
 
 static void stm32mp_ca35_lpi_restore(void)
 {
 	/* Use write set registers to set bits */
-	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1), TS_CSYSREQ);
 	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1), STGEN_CSYSREQ);
 
-	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1)) & TS_CSYSACK) == 0U) {
+	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1))
+		& STGEN_CSYSACK) == 0U) {
 		;
 	}
-	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1)) & STGEN_CSYSACK) == 0U) {
-		;
+
+	if (clk_is_enabled(CK_SYSDBG)) {
+		mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1), TS_CSYSREQ);
+
+		while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1))
+			& TS_CSYSACK) == 0U) {
+			;
+		}
 	}
 }
 
