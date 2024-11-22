@@ -704,6 +704,10 @@ static void stm32_pwr_domain_on_finish(const psci_power_state_t *target_state)
 	} else {
 		/* Restore generic timer after reset */
 		stm32mp_stgen_restore_rate();
+#if !STM32MP21
+		/* clear flag after core 1 power on */
+		mmio_setbits_32(rcc_base + RCC_C1HWRSTSCLRR, RCC_C1HWRSTSCLRR_C1P1RSTF);
+#endif /* !STM32MP21 */
 	}
 
 	stm32mp2_disable_rcc_wakeup_irq(rcc_base);
