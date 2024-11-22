@@ -157,12 +157,12 @@ static void print_reset_reason(void)
 		INFO("  IWDG5 system reset (rst_iwdg5)\n");
 		return;
 	}
-#endif /* !STM32MP21 */
 
 	if ((rstsr & RCC_C1BOOTRSTSCLRR_C1P1RSTF) != 0U) {
 		INFO("  A35 processor core 1 reset\n");
 		return;
 	}
+#endif /* !STM32MP21 */
 
 	if ((rstsr & RCC_C1BOOTRSTSCLRR_PADRSTF) != 0U) {
 		INFO("  Pad Reset from NRST\n");
