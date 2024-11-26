@@ -89,7 +89,6 @@ uintptr_t stm32_sec_entrypoint;
 static u_register_t saved_scr_el3;
 
 static uint32_t lpstop1_pwrlpdly;
-static uint32_t stop2_pwrlpdly;
 
 #if !STM32MP21
 /* bitfield to indicate the modified AMEN bit for LP-SRAM1/2/3 */
@@ -612,7 +611,6 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 		if (!cpu2_running) {
 			mmio_write_32(pwr_base + PWR_CPU2CR, 0U);
 		}
-		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, stop2_pwrlpdly);
 		stm32mp_gic_cpuif_disable();
 		stm32mp_gic_save();
 		stm32mp2_pll1_disable();
@@ -624,7 +622,6 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 		if (!cpu2_running) {
 			mmio_write_32(pwr_base + PWR_CPU2CR, PWR_CPU2CR_LPDS_D2);
 		}
-		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, stop2_pwrlpdly);
 		stm32mp_gic_cpuif_disable();
 		stm32mp_gic_save();
 		stm32mp2_pll1_disable();
@@ -638,7 +635,6 @@ static void stm32_pwr_domain_suspend(const psci_power_state_t *target_state)
 			mmio_write_32(pwr_base + PWR_CPU2CR,
 				      PWR_CPU2CR_LPDS_D2 | PWR_CPU2CR_LVDS_D2);
 		}
-		mmio_write_32(rcc_base + RCC_PWRLPDLYCR, stop2_pwrlpdly);
 		stm32mp_gic_cpuif_disable();
 		stm32mp_gic_save();
 		stm32mp2_pll1_disable();
@@ -1333,8 +1329,6 @@ static void stm32_pm_init(void *fdt)
 	/* Compute RCC PWR LP DLY according to parent clock */
 	lsmcu = mmio_read_32(rcc_base + RCC_LSMCUDIVR) & RCC_LSMCUDIVR_LSMCUDIV;
 	lpstop1_pwrlpdly = PWRLPDLYCR_VAL(param.lpstop1dly, lsmcu);
-	/* Wait 2ms for Stop2 */
-	stop2_pwrlpdly = PWRLPDLYCR_VAL(2000, lsmcu);
 }
 
 /*******************************************************************************
