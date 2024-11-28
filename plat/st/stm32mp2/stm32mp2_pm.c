@@ -931,8 +931,6 @@ static void __dead2 stm32_system_off(void)
 		mmio_clrbits_32(rcc_base + RCC_CPUBOOTCR, RCC_CPUBOOTCR_BOOT_CPU2);
 		mmio_setbits_32(rcc_base + RCC_C2RSTCSETR, RCC_C2RSTCSETR_C2RST);
 		dsb();
-		/* Deactivate CID filtering on region 3 for PWR_CPU2CR */
-		mmio_write_32(pwr_base + PWR_R3CIDCFGR, 0U);
 	}
 
 #if !STM32MP21
@@ -965,6 +963,9 @@ static void __dead2 stm32_system_off(void)
 
 	/* Request STOP for both cores */
 	mmio_write_32(rcc_base + RCC_C1SREQSETR, RCC_C1SREQSETR_STPREQ_MASK);
+
+	/* Deactivate CID filtering on region 3 for PWR_CPU2CR */
+	mmio_write_32(pwr_base + PWR_R3CIDCFGR, 0U);
 
 	/* Request standby2 */
 	mmio_write_32(pwr_base + PWR_CPU1CR, PWR_CPU1CR_PDDS_D1 | PWR_CPU1CR_PDDS_D2);
