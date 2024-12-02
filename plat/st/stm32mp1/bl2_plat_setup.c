@@ -726,9 +726,7 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 			bl_mem_params->ep_info.args.arg0 = 0;
 		}
 
-		if (bl_mem_params->ep_info.pc >= STM32MP_DDR_BASE) {
-			stm32_context_save_bl2_param();
-		}
+		stm32_context_save_bl2_param();
 		break;
 
 	case BL33_IMAGE_ID:
