@@ -84,6 +84,17 @@ static void iac_dump(void)
 #endif
 }
 
+#if STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER
+static void clean_iac(void)
+{
+	uint32_t i;
+
+	for (i = 0U; i < IAC_NB; i++) {
+		mmio_write_32((IAC_BASE + IAC_ICR(i)), (uint32_t)~0U);
+	}
+}
+#endif
+
 static void print_reset_reason(void)
 {
 	uint32_t rstsr = mmio_read_32(stm32mp_rcc_base() + RCC_C1BOOTRSTSCLRR);
@@ -343,7 +354,6 @@ end:
 #endif /* TRUSTED_BOARD_BOOT && DYN_DISABLE_AUTH && !STM32MP21 */
 }
 
-
 void bl2_el3_plat_arch_setup(void)
 {
 	const char *board_model;
@@ -437,6 +447,14 @@ void bl2_el3_plat_arch_setup(void)
 	}
 
 	iac_dump();
+
+#if STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER
+	/*
+	 * fixup: clean IAC that may be caused by bootrom. They are
+	 * irrelevant in programmer mode.
+	 */
+	clean_iac();
+#endif
 
 	stm32mp_print_cpuinfo();
 
