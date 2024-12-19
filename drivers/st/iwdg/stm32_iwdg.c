@@ -33,7 +33,6 @@
 struct stm32_iwdg_instance {
 	uintptr_t base;
 	unsigned long clock;
-	int num_irq;
 };
 
 static struct stm32_iwdg_instance stm32_iwdg[IWDG_MAX_INSTANCE];
