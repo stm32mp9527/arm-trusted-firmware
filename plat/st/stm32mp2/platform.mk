@@ -376,7 +376,9 @@ ifeq ($(filter 1,${STM32MP_UART_PROGRAMMER} ${STM32MP_USB_PROGRAMMER}),)
 BL31_SOURCES			+=	plat/st/stm32mp2/stm32mp2_pm.c
 endif
 
+ifeq ($(STM32MP_M33_TDCID),0)
 BL31_SOURCES			+=	drivers/st/ddr/stm32mp2_ddr_helpers.c
+endif
 
 # Generic GIC v2
 include drivers/arm/gic/v2/gicv2.mk
