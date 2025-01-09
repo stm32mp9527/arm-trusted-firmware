@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2017-2025, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -73,5 +73,11 @@ uint32_t bsec_permanent_lock_otp(uint32_t otp);
 #if defined(IMAGE_BL32)
 uint32_t bsec_check_nsec_access_rights(uint32_t otp);
 #endif
+
+#if defined(STM32MP21) && STM32MP21 && !(defined(STM32MP_M33_TDCID) && STM32MP_M33_TDCID)
+void bsec_increment_hdpl(void);
+#else
+static inline void bsec_increment_hdpl(void) {}
+#endif /* STM32MP21 */
 
 #endif /* BSEC_H */
