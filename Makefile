@@ -30,6 +30,7 @@ include ${MAKE_HELPERS_DIRECTORY}build_env.mk
 ################################################################################
 
 include ${MAKE_HELPERS_DIRECTORY}defaults.mk
+PLAT				:= ${DEFAULT_PLAT}
 include ${MAKE_HELPERS_DIRECTORY}plat_helpers.mk
 
 # To be able to set platform specific defaults
