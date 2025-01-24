@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
+# Copyright (c) 2023-2025, STMicroelectronics - All Rights Reserved
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -175,9 +175,9 @@ $(eval $(call TOOL_ADD_PAYLOAD,${STM32MP_FW_CONFIG},--fw-config))
 # Add the SOC_FW_CONFIG to FIP and specify the same to certtool
 ifeq ($(ENCRYPT_BL31),1)
 STM32MP_SOC_FW_CONFIG_ENC 	:= 	$(patsubst %.dtb,%_enc.dtb,$(STM32MP_SOC_FW_CONFIG))
-$(call ENCRYPT_FW,$(STM32MP_SOC_FW_CONFIG),$(STM32MP_SOC_FW_CONFIG_ENC))
+$(eval $(call ENCRYPT_FW,$(STM32MP_SOC_FW_CONFIG),$(STM32MP_SOC_FW_CONFIG_ENC)))
 endif
-$(eval $(call TOOL_ADD_IMG_PAYLOAD,STM32MP_SOC_FW_CONFIG,$(STM32MP_SOC_FW_CONFIG),--soc-fw-config,$(patsubst %.dtb,%.dts,$(STM32MP_SOC_FW_CONFIG)),$(STM32MP_SOC_FW_CONFIG_ENC)))
+$(eval $(call TOOL_ADD_IMG_PAYLOAD,STM32MP_SOC_FW_CONFIG,$(STM32MP_SOC_FW_CONFIG),--soc-fw-config,$(patsubst %.dtb,%.dts,$(STM32MP_SOC_FW_CONFIG)),,$(STM32MP_SOC_FW_CONFIG_ENC)))
 
 ifeq (${STM32MP_DDR_FIP_IO_STORAGE},1)
 # Add the FW_DDR to FIP and specify the same to certtool
