@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2023, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015-2025, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -589,6 +589,12 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 			prepare_encryption();
 		}
 #endif
+
+		/* Restore DDR training area on resume after encryption was enabled */
+		if (wakeup_ddr_sr) {
+			stm32_restore_ddr_training_area();
+		}
+
 		if (stm32mp_skip_boot_device_after_standby()) {
 			return 0;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2017-2025, ARM Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -188,9 +188,14 @@ void stm32_restore_ddr_training_area(void)
 
 	backup_data = (struct backup_data_s *)STM32MP_BACKUP_RAM_BASE;
 
+	inv_dcache_range(STM32MP_DDR_BASE, TRAINING_AREA_SIZE);
+
 	memcpy((uint32_t *)STM32MP_DDR_BASE,
 	       &backup_data->ddr_training_backup,
 	       TRAINING_AREA_SIZE);
+
+	flush_dcache_range(STM32MP_DDR_BASE, TRAINING_AREA_SIZE);
+
 	dsb();
 
 	clk_disable(BKPSRAM);
