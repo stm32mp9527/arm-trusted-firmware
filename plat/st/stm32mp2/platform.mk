@@ -83,6 +83,9 @@ else
 STM32_HEADER_VERSION_MINOR	:=	2
 endif
 
+# PM context version check between BL2 and BL31: break backward compatibility
+STM32MP_CONTEXT_VERSION		?=	1
+
 PKA_USE_NIST_P256		?=	0
 PKA_USE_BRAINPOOL_P256T1 	?=	0
 
@@ -196,6 +199,7 @@ $(eval $(call assert_booleans,\
 		PKA_USE_NIST_P256 \
 		STM32MP_CRYPTO_ROM_LIB \
 		STM32_SAES_CRYP2 \
+		STM32MP_CONTEXT_VERSION \
 		STM32MP_DDR_DUAL_AXI_PORT \
 		STM32MP_DDR_FIP_IO_STORAGE \
 		STM32MP_DDR3_TYPE \
@@ -233,6 +237,7 @@ $(eval $(call add_defines,\
 		STM32_SAES_VER \
 		STM32_SAES_CRYP2 \
 		STM32_TF_A_COPIES \
+		STM32MP_CONTEXT_VERSION \
 		STM32MP_CRYPTO_ROM_LIB \
 		STM32MP_DDR_DUAL_AXI_PORT \
 		STM32MP_DDR_FIP_IO_STORAGE \
@@ -373,7 +378,10 @@ BL31_SOURCES			+=	plat/st/stm32mp2/bl31_plat_setup.c			\
 					plat/st/stm32mp2/stm32mp2_topology.c
 
 ifeq ($(filter 1,${STM32MP_UART_PROGRAMMER} ${STM32MP_USB_PROGRAMMER}),)
-BL31_SOURCES			+=	plat/st/stm32mp2/stm32mp2_pm.c
+BL31_SOURCES			+=	plat/st/stm32mp2/stm32mp2_pm.c				\
+					common/tf_crc32.c
+
+BL31_CPPFLAGS += -march=armv8-a+crc
 endif
 
 ifeq ($(STM32MP_M33_TDCID),0)
