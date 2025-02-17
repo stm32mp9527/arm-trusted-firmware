@@ -492,7 +492,6 @@ enum enum_gate_cfg {
 	.set_clr	= (_offset_clr),\
 }
 
-/* TODO : ADD MCO... ETH */
 static const struct gate_cfg gates_mp2[LAST_GATE] = {
 	GATE_CFG(GATE_LSE,		RCC_BDCR,		0,	0),
 #if STM32MP21
@@ -1843,7 +1842,6 @@ static void stm32mp2_clk_xbar_on_hsi(struct stm32_clk_priv *priv)
 #endif
 #endif /* IMAGE_BL2 */
 
-/* TODO: MOVE THIS FUNCTION A35 ONLY */
 static int stm32mp2_a35_pll1_start(void)
 {
 	uintptr_t a35_ss_address = A35SSC_BASE;
@@ -2029,11 +2027,6 @@ static int _clk_stm32_pll1_init(struct stm32_clk_priv *priv, int pll_idx,
 	unsigned long refclk;
 	int ret = 0;
 
-	/*
-	 * TODO: check if pll has already good parameters or if we could make
-	    a configuration on the fly.
-	 */
-
 	stm32mp2_a35_ss_on_bypass();
 
 #if STM32MP_M33_TDCID
@@ -2091,11 +2084,6 @@ static int _clk_stm32_pll_init(struct stm32_clk_priv *priv, int pll_idx,
 	uintptr_t pllxcfgr1 = priv->base + pll->reg_pllxcfgr1;
 	bool spread_spectrum = false;
 	int ret = 0;
-
-	/*
-	 * TODO: check if pll has already good parameters or if we could make
-	    a configuration on the fly.
-	 */
 
 	_clk_stm32_pll_disable(priv, pll);
 
@@ -2311,7 +2299,6 @@ static int stm32mp2_clk_flexgen_configure(struct stm32_clk_priv *priv)
 		pdiv = (cmd_data & FLEX_PDIV_MASK) >> FLEX_PDIV_SHIFT;
 		fdiv = (cmd_data & FLEX_FDIV_MASK) >> FLEX_FDIV_SHIFT;
 
-		/* TODO: check if channel can be reconfigured */
 		switch (channel) {
 		case 33U: /* STGEN */
 			break;
