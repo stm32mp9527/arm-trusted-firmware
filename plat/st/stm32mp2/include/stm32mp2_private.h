@@ -91,12 +91,12 @@ static inline uint32_t stm32_otp_read_sw_lock(uint32_t otp, bool *value)
 
 static inline bool stm32_otp_is_closed_device(void)
 {
-	return bsec_mode_is_closed_device();
+	return (bsec_get_state() & BSEC_STATE_MASK) == BSEC_STATE_CLOSED;
 }
 
 static inline bool stm32_otp_is_hwkey_valid(void)
 {
-	if ((bsec_get_secure_state() & BSEC_HARDWARE_KEY) != 0U) {
+	if ((bsec_get_state() & BSEC_HARDWARE_KEY) != 0U) {
 		return true;
 	}
 
