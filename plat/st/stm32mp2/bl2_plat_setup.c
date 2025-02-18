@@ -224,8 +224,26 @@ static void handle_confirmed_tamper(uint32_t bit_off __unused)
 	panic();
 }
 
+static bool tamper_is_accesssible(void)
+{
+	uint32_t r0cidcfgr = mmio_read_32(TAMP_BASE + TAMP_R0CIDCFGR);
+
+	return !(((r0cidcfgr & TAMP_R0CIDCFGR_CFEN) == TAMP_R0CIDCFGR_CFEN) &&
+		 ((r0cidcfgr & TAMP_R0CIDCFGR_CID) != TAMP_R0CIDCFGR_CID1));
+}
+
 static bool lse_tamper_detection(void)
 {
+	/*
+	 * In case the backup domain hasn't been reset on warm boot cases, the
+	 * TAMP RIF configuration is maintained.
+	 * Therefore, TAMP_SR may not be accessible. In this case skip tamper
+	 * detection.
+	 */
+	if (!tamper_is_accesssible()) {
+		return false;
+	}
+
 	if ((mmio_read_32(TAMP_BASE + TAMP_SR) & TAMP_SR_LSE_MONITORING) != 0U) {
 		mmio_clrbits_32(RCC_BASE + RCC_BDCR, RCC_BDCR_LSECSSON);
 		mmio_clrbits_32(RCC_BASE + RCC_BDCR, RCC_BDCR_LSEON);
@@ -279,8 +297,20 @@ static void reset_backup_domain(void)
 static void check_tamper_event(bool lse_tamper_occured)
 {
 #if !STM32MP_M33_TDCID
-	uint32_t sr = mmio_read_32(TAMP_BASE + TAMP_SR);
+	uint32_t sr;
 
+	/*
+	 * In case the backup domain hasn't been reset on warm boot cases, the
+	 * TAMP RIF configuration is maintained.
+	 * Therefore, TAMP_SR may not be accessible. In this case skip tamper
+	 * detection.
+	 */
+	if (!tamper_is_accesssible()) {
+		INFO("TAMP IP not accessible, skip tamper verification\n");
+		return;
+	}
+
+	sr = mmio_read_32(TAMP_BASE + TAMP_SR);
 	if (sr == 0U) {
 		return;
 	}
