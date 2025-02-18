@@ -541,7 +541,7 @@ uint32_t stm32mp_check_closed_device(void)
 		panic();
 	}
 
-	if (!stm32_otp_is_closed_device() ||
+	if (!stm32_is_bsec_closed() ||
 	    ((otp_val & SECURE_BOOT_CLOSED_SECURE) == 0U)) {
 		status = STM32MP_CHIP_SEC_OPEN;
 	}
