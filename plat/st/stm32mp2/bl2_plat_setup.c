@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2023-2025, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -53,12 +53,15 @@ IMPORT_SYM(uintptr_t, __DATA_END__, DATA_END);
 #define IAC_EXCEPT_LSB_BIT(x) ((x) * 32U)
 #define IAC_EXCEPT_MSB_BIT(x) (IAC_EXCEPT_LSB_BIT(x) + 31U)
 
+#if DEBUG && !STM32MP_M33_TDCID
+/* Save all IAC ISR registers + the number of IAC found on last u32 */
+static uint32_t iac_list[IAC_NB + 1U];
+#endif
+
 static void iac_dump(void)
 {
-#if !STM32MP_M33_TDCID
-#if DEBUG
-	unsigned int i;
-	unsigned int bit;
+#if DEBUG && !STM32MP_M33_TDCID
+	uint32_t i;
 
 	for (i = 0U; i < IAC_NB; i++) {
 		uint32_t isr = mmio_read_32(IAC_BASE + IAC_ISR(i));
@@ -68,6 +71,25 @@ static void iac_dump(void)
 		if (isr == 0U) {
 			continue;
 		}
+
+		iac_list[i] = isr;
+		iac_list[IAC_NB]++;
+	}
+#endif
+}
+
+static void iac_display(void)
+{
+#if DEBUG && !STM32MP_M33_TDCID
+	unsigned int i;
+	unsigned int bit;
+
+	if (iac_list[IAC_NB] == 0U) {
+		return;
+	}
+
+	for (i = 0U; i < IAC_NB; i++) {
+		uint32_t isr = iac_list[i];
 
 		WARN("IAC exceptions pending [%u:%u] = %x\n",
 		     IAC_EXCEPT_MSB_BIT(i), IAC_EXCEPT_LSB_BIT(i), isr);
@@ -80,7 +102,6 @@ static void iac_dump(void)
 			bit++;
 		}
 	}
-#endif
 #endif
 }
 
@@ -172,6 +193,16 @@ void bl2_el3_early_platform_setup(u_register_t arg0 __unused,
 #if STM32MP_M33_TDCID
 	/* Synchronisation point between TF-A and TF-M */
 	notify_cpu2();
+#endif
+
+	iac_dump();
+
+#if STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER
+	/*
+	 * fixup: clean IAC that may be caused by bootrom. They are
+	 * irrelevant in programmer mode.
+	 */
+	clean_iac();
 #endif
 
 	stm32mp_save_boot_ctx_address(BOOT_CTX_ADDR);
@@ -476,15 +507,7 @@ void bl2_el3_plat_arch_setup(void)
 		goto skip_console_init;
 	}
 
-	iac_dump();
-
-#if STM32MP_UART_PROGRAMMER || STM32MP_USB_PROGRAMMER
-	/*
-	 * fixup: clean IAC that may be caused by bootrom. They are
-	 * irrelevant in programmer mode.
-	 */
-	clean_iac();
-#endif
+	iac_display();
 
 	stm32mp_print_cpuinfo();
 
