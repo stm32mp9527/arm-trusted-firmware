@@ -12,6 +12,7 @@
 #include <arch_helpers.h>
 #include <common/debug.h>
 #include <common/desc_image_load.h>
+#include <drivers/arm/rse_comms.h>
 #include <drivers/clk.h>
 #include <drivers/delay_timer.h>
 #include <drivers/generic_delay_timer.h>
@@ -19,6 +20,7 @@
 #include <drivers/st/bsec.h>
 #include <drivers/st/regulator.h>
 #include <drivers/st/regulator_fixed.h>
+#include <drivers/st/rse_shm.h>
 #include <drivers/st/stm32_console.h>
 #include <drivers/st/stm32_hash.h>
 #include <drivers/st/stm32_iwdg.h>
@@ -35,6 +37,9 @@
 #include <lib/fconf/fconf_dyn_cfg_getter.h>
 #include <lib/mmio.h>
 #include <lib/optee_utils.h>
+#if STM32MP_M33_TDCID
+#include <lib/psa/rse_platform_api.h>
+#endif
 #include <lib/xlat_tables/xlat_tables_v2.h>
 #include <plat/common/platform.h>
 
@@ -213,6 +218,11 @@ void bl2_el3_early_platform_setup(u_register_t arg0 __unused,
 void bl2_platform_setup(void)
 {
 	int ret;
+#if STM32MP_M33_TDCID
+	const struct rse_shmem psa_client = {
+		.base = (void *)RSE_SHMEM_BASE,
+		.len =  RSE_SHMEM_SIZE };
+#endif
 
 #if !STM32MP_M33_TDCID
 	ret = stm32mp2_ddr_probe();
@@ -237,6 +247,14 @@ void bl2_platform_setup(void)
 #if !STM32MP_M33_TDCID
 	/* Set QOS ICN priority */
 	stm32mp_syscfg_set_icn_qos();
+#endif
+
+#if STM32MP_M33_TDCID
+	ret = rse_mbx_init(&psa_client);
+	if (ret < 0) {
+		ERROR("rse_mbx_init %d\n", ret);
+		panic();
+	}
 #endif
 }
 
