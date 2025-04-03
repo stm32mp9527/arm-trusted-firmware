@@ -374,6 +374,8 @@ int stm32_rng_init(void)
 			panic();
 		}
 
+		parse_dt_optional_config(fdt, node);
+
 		stm32_rng.clock = (unsigned long)dt_rng.clock;
 		clk_enable(stm32_rng.clock);
 
@@ -396,8 +398,6 @@ int stm32_rng_init(void)
 				panic();
 			}
 		}
-
-		parse_dt_optional_config(fdt, node);
 
 		ret = stm32_rng_enable();
 		if (ret != 0) {
