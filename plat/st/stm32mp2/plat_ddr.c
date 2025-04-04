@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2024, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2023-2025, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -42,14 +42,9 @@ static int ddr_power_init(void *fdt, int node)
 
 	/*
 	 * DDR3 power on sequence is:
-	 * enable VREF_DDR, VTT_DDR, VPP_DDR
+	 * enable VREF_DDR, VTT_DDR, VDD_DDR
 	 */
 	status = regulator_set_min_voltage(supply.vdd);
-	if (status != 0) {
-		return status;
-	}
-
-	status = regulator_enable(supply.vdd);
 	if (status != 0) {
 		return status;
 	}
@@ -59,7 +54,12 @@ static int ddr_power_init(void *fdt, int node)
 		return status;
 	}
 
-	return regulator_enable(supply.vtt);
+	status = regulator_enable(supply.vtt);
+	if (status != 0) {
+		return status;
+	}
+
+	return regulator_enable(supply.vdd);
 }
 #endif /* STM32MP_DDR3_TYPE */
 
@@ -92,8 +92,7 @@ static int ddr_power_init(void *fdt, int node)
 
 	/*
 	 * DDR4 power on sequence is:
-	 * enable VPP_DDR
-	 * enable VREF_DDR, VTT_DDR, VPP_DDR
+	 * enable VPP_DDR, VREF_DDR, VTT_DDR, VDD_DDR
 	 */
 	status = regulator_set_min_voltage(supply.vpp);
 	if (status != 0) {
@@ -110,17 +109,17 @@ static int ddr_power_init(void *fdt, int node)
 		return status;
 	}
 
-	status = regulator_enable(supply.vdd);
-	if (status != 0) {
-		return status;
-	}
-
 	status = regulator_enable(supply.vref);
 	if (status != 0) {
 		return status;
 	}
 
-	return regulator_enable(supply.vtt);
+	status = regulator_enable(supply.vtt);
+	if (status != 0) {
+		return status;
+	}
+
+	return regulator_enable(supply.vdd);
 }
 #endif /* STM32MP_DDR4_TYPE */
 
