@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2024, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2018-2025, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: GPL-2.0+ OR BSD-3-Clause
  */
@@ -662,19 +662,21 @@ void stm32mp1_ddr_init(struct stm32mp_ddr_priv *priv,
 	uint64_t time;
 	int ret = -EINVAL;
 
-	if ((config->c_reg.mstr & DDRCTRL_MSTR_DDR3) != 0U) {
-		ret = stm32mp_board_ddr_power_init(STM32MP_DDR3);
-	} else if ((config->c_reg.mstr & DDRCTRL_MSTR_LPDDR2) != 0U) {
-		ret = stm32mp_board_ddr_power_init(STM32MP_LPDDR2);
-	} else if ((config->c_reg.mstr & DDRCTRL_MSTR_LPDDR3) != 0U) {
-		ret = stm32mp_board_ddr_power_init(STM32MP_LPDDR3);
-	} else {
-		ERROR("DDR type not supported\n");
-	}
+	if (!config->self_refresh) {
+		if ((config->c_reg.mstr & DDRCTRL_MSTR_DDR3) != 0U) {
+			ret = stm32mp_board_ddr_power_init(STM32MP_DDR3);
+		} else if ((config->c_reg.mstr & DDRCTRL_MSTR_LPDDR2) != 0U) {
+			ret = stm32mp_board_ddr_power_init(STM32MP_LPDDR2);
+		} else if ((config->c_reg.mstr & DDRCTRL_MSTR_LPDDR3) != 0U) {
+			ret = stm32mp_board_ddr_power_init(STM32MP_LPDDR3);
+		} else {
+			ERROR("DDR type not supported\n");
+		}
 
-	if (ret != 0) {
-		ERROR("DDR power init failed\n");
-		panic();
+		if (ret != 0) {
+			ERROR("DDR power init failed\n");
+			panic();
+		}
 	}
 
 	VERBOSE("name = %s\n", config->info.name);
