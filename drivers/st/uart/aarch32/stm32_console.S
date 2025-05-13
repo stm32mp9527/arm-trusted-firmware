@@ -219,7 +219,7 @@ endfunc console_stm32_core_getc
 	 *
 	 * In : r0 - console base address
 	 * Out : void.
-	 * Clobber list : r0, r1, r2
+	 * Clobber list : r0, r1
 	 * ---------------------------------------------------------------
 	 */
 func console_stm32_core_flush
@@ -231,14 +231,11 @@ func console_stm32_core_flush
 	ldr	r1, [r0, #USART_CR1]
 	tst	r1, #USART_CR1_UE
 	beq	1f
-	/* Check Transmit Data Register Empty */
-	mov	r2, #USART_TIMEOUT
-txe_loop_3:
-	subs	r2, r2, #1
-	beq	1f
+	/* Check Transmission Complete flag */
+tc_loop:
 	ldr	r1, [r0, #USART_ISR]
 	tst	r1, #USART_ISR_TXE
-	beq	txe_loop_3
+	beq	tc_loop
 1:
 	bx	lr
 endfunc console_stm32_core_flush
