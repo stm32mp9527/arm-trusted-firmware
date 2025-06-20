@@ -295,7 +295,8 @@ PLAT_BL_COMMON_SOURCES		+=	drivers/st/i2c/stm32_i2c.c
 PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/stm32mp2_private.c
 
 ifeq ($(STM32MP_M33_TDCID),0)
-PLAT_BL_COMMON_SOURCES		+=	drivers/st/bsec/bsec3.c
+PLAT_BL_COMMON_SOURCES		+=	drivers/st/bsec/bsec3.c \
+					plat/st/stm32mp2/plat_ddr.c
 else
 PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/stm32mp2_otp.c
 endif
@@ -319,8 +320,7 @@ endif
 BL2_SOURCES			+=	plat/st/stm32mp2/plat_bl2_mem_params_desc.c
 
 BL2_SOURCES			+=	drivers/st/crypto/stm32_hash.c				\
-					plat/st/stm32mp2/bl2_plat_setup.c			\
-					plat/st/stm32mp2/plat_ddr.c
+					plat/st/stm32mp2/bl2_plat_setup.c
 
 BL2_SOURCES			+=	drivers/st/rif/stm32_rifsc.c
 
