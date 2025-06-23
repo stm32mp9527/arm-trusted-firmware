@@ -294,9 +294,10 @@ PLAT_BL_COMMON_SOURCES		+=	drivers/st/i2c/stm32_i2c.c
 
 PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/stm32mp2_private.c
 
+PLAT_BL_COMMON_SOURCES		+=	drivers/st/bsec/bsec3.c
+
 ifeq ($(STM32MP_M33_TDCID),0)
-PLAT_BL_COMMON_SOURCES		+=	drivers/st/bsec/bsec3.c \
-					plat/st/stm32mp2/plat_ddr.c
+PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/plat_ddr.c
 else
 PLAT_BL_COMMON_SOURCES		+=	plat/st/stm32mp2/stm32mp2_otp.c
 endif
