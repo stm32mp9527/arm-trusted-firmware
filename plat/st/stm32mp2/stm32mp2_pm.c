@@ -970,8 +970,10 @@ static void __dead2 stm32_system_off(void)
 
 #if !STM32MP_M33_TDCID
 	/* Force DDR off */
-	mmio_clrbits_32(rcc_base + RCC_DDRITFCFGR, RCC_DDRITFCFGR_DDRSHR);
 	stm32mp_board_ddr_power_off();
+
+	/* Disable DDRSHR */
+	mmio_clrbits_32(rcc_base + RCC_DDRITFCFGR, RCC_DDRITFCFGR_DDRSHR);
 #endif
 
 	/* Prevent interrupts from spuriously waking up this cpu */
