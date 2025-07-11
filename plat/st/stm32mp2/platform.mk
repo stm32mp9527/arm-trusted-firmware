@@ -413,6 +413,7 @@ BL31_SOURCES			+=	plat/st/stm32mp2/bl31_plat_setup.c			\
 
 ifeq ($(filter 1,${STM32MP_UART_PROGRAMMER} ${STM32MP_USB_PROGRAMMER}),)
 BL31_SOURCES			+=	plat/st/stm32mp2/stm32mp2_pm.c				\
+					plat/st/stm32mp2/stm32mp2_ca35ss.c			\
 					common/tf_crc32.c
 
 BL31_CPPFLAGS += -march=armv8-a+crc

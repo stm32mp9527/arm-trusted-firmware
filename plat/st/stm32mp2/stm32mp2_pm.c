@@ -29,6 +29,7 @@
 
 #include <platform_def.h>
 #include <stm32mp2_context.h>
+#include <stm32mp2_private.h>
 
 #include "../../../lib/psci/psci_private.h"
 
@@ -39,22 +40,6 @@
 #define DEFAULT_LPCFG_D2	1U		/* PWR_ON=0 for Standby1/2 = PMIC_PWRCTRL1 */
 #define DEFAULT_LPLVDLY_D2	0U		/* 6xLSI cycle = 187 us */
 #define DEFAULT_LPSTOP1DLY	100U		/* LP-Stop1 PWRLP_DLY to wait VTT */
-
-/* Standardized status and control registers (SSC) access modes */
-#define A35SSC_SSC_RW			U(0x0)
-#define A35SSC_SSC_WS1			U(0x4)
-#define A35SSC_SSC_WC1			U(0x8)
-#define A35SSC_SSC_WT1			U(0xC)
-
-#define CA35SS_SSC_LPI_TSGEN_NTS(type)	(U(0x0D0) + A35SSC_SSC_ ## type)
-#define TS_CSYSREQ			BIT_32(8)
-#define TS_CSYSACK			BIT_32(9)
-
-#define CA35SS_SSC_LPI_STGEN_NTS(type)	(U(0x140) + A35SSC_SSC_ ## type)
-#define STGEN_CSYSREQ			BIT_32(24)
-#define STGEN_CSYSACK			BIT_32(25)
-
-#define CA35SS_SYSCFG_VBAR_CR	0x2084U
 
 #define RAMCFG_RETRAMCR		0x180U
 #define SRAMHWERDIS		BIT(12)
@@ -215,52 +200,6 @@ static void stm32mp_state_set(unsigned int core_id, unsigned int state_id, bool 
 	flush_dcache_range((uintptr_t)&stm32_percpu_data[core_id], sizeof(stm32_percpu_data[0]));
 	if (spin_lock_available) {
 		spin_unlock(&stm32mp_state_lock);
-	}
-}
-
-/*
- * To guarantee a correct synchronization of the ARM counter with STGEN,
- * the ARM generic timer has to  be isolated before entering in low power
- * mode. Once this is done, the delays or timeouts function based on this
- * timer will never end.
- */
-static void stm32mp_ca35_lpi_isolate(void)
-{
-	/* Use write clear registers to clear bits */
-	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1), STGEN_CSYSREQ);
-
-	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WC1))
-		& STGEN_CSYSACK) != 0U) {
-		;
-	}
-
-	if (clk_is_enabled(CK_SYSDBG)) {
-		mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1), TS_CSYSREQ);
-
-		while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WC1))
-			& TS_CSYSACK) != 0U) {
-			;
-		}
-	}
-}
-
-static void stm32mp_ca35_lpi_restore(void)
-{
-	/* Use write set registers to set bits */
-	mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1), STGEN_CSYSREQ);
-
-	while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_STGEN_NTS(WS1))
-		& STGEN_CSYSACK) == 0U) {
-		;
-	}
-
-	if (clk_is_enabled(CK_SYSDBG)) {
-		mmio_write_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1), TS_CSYSREQ);
-
-		while ((mmio_read_32(A35SSC_BASE + CA35SS_SSC_LPI_TSGEN_NTS(WS1))
-			& TS_CSYSACK) == 0U) {
-			;
-		}
 	}
 }
 
@@ -797,7 +736,7 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 			stm32mp_gic_resume();
 			stm32mp_gic_cpuif_enable();
 #if !STM32MP21
-			mmio_write_32(A35SSC_BASE + CA35SS_SYSCFG_VBAR_CR, stm32_sec_entrypoint);
+			stm32mp_ca35_set_vbar(stm32_sec_entrypoint);
 			/* Start the secondary core if it was running before Standby */
 			if ((core_id == STM32MP_PRIMARY_CPU) &&
 			    stm32mp_state_check(STM32MP_SECONDARY_CPU, STATE_START)) {
@@ -830,10 +769,10 @@ static void stm32_pwr_domain_suspend_finish(const psci_power_state_t
 		stm32mp_gic_resume();
 		stm32mp_gic_cpuif_enable();
 
-		/* Restore register in CA35SS */
-		mmio_write_32(A35SSC_BASE + CA35SS_SYSCFG_VBAR_CR, stm32_sec_entrypoint);
-
 #if !STM32MP21
+		/* Restore register in CA35SS */
+		stm32mp_ca35_set_vbar(stm32_sec_entrypoint);
+
 		/* Start the secondary core if it was running before STOP */
 		if ((core_id == STM32MP_PRIMARY_CPU) &&
 		    stm32mp_state_check(STM32MP_SECONDARY_CPU, STATE_START)) {
@@ -904,7 +843,8 @@ static void __dead2 stm32_pwr_domain_pwr_down_wfi(const psci_power_state_t
 	/* The first power down on core 0, core 1 is running */
 	if ((core_id == STM32MP_PRIMARY_CPU) &&
 	    !stm32mp_state_check(STM32MP_PRIMARY_CPU, STATE_START)) {
-		uintptr_t sec_entrypoint;
+		/* Cast uintptr_t to function pointer via void * to comply with MISRA Rule 11.1 */
+		void (*sec_entry_point_f)(void) = (void (*)(void))(void *)stm32_sec_entrypoint;
 
 		/* Core 0 can't be turned OFF, emulate it with a WFE loop */
 		VERBOSE("BL31: core0 entering wait loop...\n");
@@ -914,10 +854,9 @@ static void __dead2 stm32_pwr_domain_pwr_down_wfi(const psci_power_state_t
 
 		VERBOSE("BL31: core0 resumed.\n");
 		dsbsy();
-		sec_entrypoint = mmio_read_32(A35SSC_BASE + CA35SS_SYSCFG_VBAR_CR);
 		/* Jump manually to entry point, with mmu disabled. */
 		disable_mmu_el3();
-		((void(*)(void))sec_entrypoint)();
+		sec_entry_point_f();
 
 		/* This shouldn't be reached */
 		panic();
@@ -971,8 +910,7 @@ static void __dead2 stm32_system_off(void)
 		stm32mp_state_set(STM32MP_SECONDARY_CPU, STATE_RUNNING, false);
 
 		/* Program secondary CPU entry points */
-		mmio_write_32(A35SSC_BASE + CA35SS_SYSCFG_VBAR_CR,
-			      (uintptr_t)&stm32_stop2_entrypoint);
+		stm32mp_ca35_set_vbar(stm32_sec_entrypoint);
 
 		/* After reset, the core is stopped, waiting in WFI loop */
 		stm32mp_state_set(STM32MP_SECONDARY_CPU, STATE_START, false);
@@ -1522,7 +1460,7 @@ int plat_setup_psci_ops(uintptr_t sec_entrypoint,
 
 	/* Program secondary CPU entry points. */
 	stm32_sec_entrypoint = sec_entrypoint;
-	mmio_write_32(A35SSC_BASE + CA35SS_SYSCFG_VBAR_CR, stm32_sec_entrypoint);
+	stm32mp_ca35_set_vbar(stm32_sec_entrypoint);
 
 	/* Initialize the state per cpu */
 	stm32_percpu_data[STM32MP_PRIMARY_CPU].state[STATE_START] = true;
