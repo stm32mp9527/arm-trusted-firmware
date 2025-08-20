@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2023-2025, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -552,12 +552,19 @@ void initialize_pmic(void)
 	}
 
 #if IMAGE_BL2
+#if LOG_LEVEL >= LOG_LEVEL_INFO
 	if (stpmic2_get_version(pmic2, &val) != 0) {
 		ERROR("Failed to access PMIC\n");
 		panic();
 	}
 	INFO("PMIC2 version = 0x%02x\n", val);
-	INFO("PMIC2 product ID = 0x%02x\n", pmic2->ref_id);
+
+	if (stpmic2_get_product_id(pmic2, &val) != 0) {
+		ERROR("Failed to access PMIC\n");
+		panic();
+	}
+	INFO("PMIC2 product ID = 0x%02x\n", val);
+#endif
 #endif
 
 	ret = register_pmic2();
