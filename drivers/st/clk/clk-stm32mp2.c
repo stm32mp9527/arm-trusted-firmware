@@ -107,12 +107,10 @@ static struct stm32_pll1_cfgs pll1_cfgs;
 #define A35_SS_PLL_ENABLE_NRESET_SWPLL_FF	BIT(2)
 
 #define TIMEOUT_US_200MS	U(200000)
-#define TIMEOUT_US_1S		U(1000000)
 
 #define PLLRDY_TIMEOUT		TIMEOUT_US_200MS
 #define CLKSRC_TIMEOUT		TIMEOUT_US_200MS
 #define CLKDIV_TIMEOUT		TIMEOUT_US_200MS
-#define OSCRDY_TIMEOUT		TIMEOUT_US_1S
 
 /* PLL minimal frequencies for clock sources */
 #define PLL_REFCLK_MIN			UL(5000000)
