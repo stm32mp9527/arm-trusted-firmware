@@ -799,6 +799,7 @@ uint32_t plat_fwu_get_boot_idx(void)
 	if (boot_idx == INVALID_BOOT_IDX) {
 		const struct fwu_metadata *data = fwu_get_metadata();
 		uint32_t bootcount = 0;
+		bool status;
 
 		boot_idx = data->active_index;
 
@@ -807,6 +808,17 @@ uint32_t plat_fwu_get_boot_idx(void)
 			err = stm32_set_max_fwu_trial_boot_cnt();
 			break;
 		case FWU_BANK_STATE_VALID:
+			err = stm32_fwu_copro_status_is_failed(&status);
+			if (err != 0) {
+				ERROR("%s: Copro status bkp register access failed.\n", __func__);
+				panic();
+			}
+
+			if (status) {
+				boot_idx = fwu_get_alternate_boot_bank();
+				break;
+			}
+
 			err = stm32_get_and_dec_fwu_trial_boot_cnt(&bootcount);
 			if (err == 0) {
 				if (bootcount == 1U) {
