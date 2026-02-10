@@ -92,7 +92,7 @@ void bl2_main(void)
 	PMF_CAPTURE_TIMESTAMP(bl_svc, BL2_ENTRY, PMF_CACHE_MAINT);
 #endif
 
-	NOTICE("BL2: %s\n", version_string);
+	NOTICE("BL2 Shuhe: %s\n", version_string);
 	NOTICE("BL2: %s\n", build_message);
 
 	/* Perform remaining generic architectural setup in S-EL1 */
