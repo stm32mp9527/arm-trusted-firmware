@@ -131,26 +131,10 @@
 #define STM32MP_SEC_SYSRAM_BASE		STM32MP_SYSRAM_BASE
 #define STM32MP_SEC_SYSRAM_SIZE		(STM32MP_SYSRAM_SIZE - \
 					 STM32MP_NS_SYSRAM_SIZE)
-//这里被更改
-// /* DDR configuration */
-// #define STM32MP_DDR_BASE		U(0xC0000000)
-// #define STM32MP_DDR_MAX_SIZE		U(0x40000000)	/* Max 1GB */
+
 /* DDR configuration */
-/* DDR start address */
-/* DDR configuration */
-/* DDR start address */
-#define STM32MP_DDR_BASE        U(0xC0000000)
-
-/* DDR total size (default 256MB, 可通过编译命令覆盖) */
-#ifndef STM32MP_DDR_SIZE
-#define STM32MP_DDR_SIZE        U(0x10000000)  /* 256MB */
-#endif
-
-/* DDR max usable size */
-#define STM32MP_DDR_MAX_SIZE    STM32MP_DDR_SIZE
-
-
-
+#define STM32MP_DDR_BASE		U(0xC0000000)
+#define STM32MP_DDR_MAX_SIZE		U(0x10000000)	/* Max 1GB */
 
 /* DDR power initializations */
 #ifndef __ASSEMBLER__
@@ -211,34 +195,13 @@ enum ddr_type {
  #endif
 #endif
 
-// #if STM32MP13
-// #define STM32MP_BL33_BASE		STM32MP_DDR_BASE
-// #endif
-// #if STM32MP15
-// #define STM32MP_BL33_BASE		(STM32MP_DDR_BASE + U(0x100000))
-// #endif
-// #define STM32MP_BL33_MAX_SIZE		U(0x400000)
 #if STM32MP13
-#define STM32MP_BL33_BASE        STM32MP_DDR_BASE       /* Linux 起始地址 */
+#define STM32MP_BL33_BASE		STM32MP_DDR_BASE
 #endif
-
 #if STM32MP15
-#define STM32MP_BL33_BASE        STM32MP_DDR_BASE       /* 也从 DDR_BASE 开始 */
+#define STM32MP_BL33_BASE		(STM32MP_DDR_BASE + U(0x100000))
 #endif
-//
-#define STM32MP_BL33_MAX_SIZE    U(0x00400000)           /* 4MB */
-
-#if STM32MP13
-//#define STM32MP_BL32_BASE        (STM32MP_BL33_BASE + STM32MP_BL33_MAX_SIZE)
-#define STM32MP_BL32_MAX_SIZE    U(0x01000000)           /* 16MB */
-#endif
-
-#if STM32MP15
-#define STM32MP_BL32_BASE        (STM32MP_BL33_BASE + STM32MP_BL33_MAX_SIZE)
-#define STM32MP_BL32_MAX_SIZE    U(0x01000000)           /* 16MB */
-#endif
-
-
+#define STM32MP_BL33_MAX_SIZE		U(0x400000)
 
 /* Define maximum page size for NAND devices */
 #define PLATFORM_MTD_MAX_PAGE_SIZE	U(0x1000)
