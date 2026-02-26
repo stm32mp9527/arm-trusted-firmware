@@ -229,7 +229,7 @@ enum ddr_type {
 #define STM32MP_BL33_MAX_SIZE    U(0x00400000)           /* 4MB */
 
 #if STM32MP13
-#define STM32MP_BL32_BASE        (STM32MP_BL33_BASE + STM32MP_BL33_MAX_SIZE)
+//#define STM32MP_BL32_BASE        (STM32MP_BL33_BASE + STM32MP_BL33_MAX_SIZE)
 #define STM32MP_BL32_MAX_SIZE    U(0x01000000)           /* 16MB */
 #endif
 
