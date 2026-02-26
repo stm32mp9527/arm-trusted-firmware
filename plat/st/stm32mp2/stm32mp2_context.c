@@ -148,6 +148,11 @@ void stm32_pm_context_save(const psci_power_state_t *state, const void *data, si
 	struct backup_data_s *backup_data;
 	void *fdt;
 
+	if (fdt_get_address(&fdt) == 0) {
+		ERROR("Cannot get BL31 DT address\n");
+		panic();
+	}
+
 	clk_enable(BACKUP_CTX_CLK);
 	backup_data = (struct backup_data_s *)BACKUP_CTX_ADDR;
 
@@ -178,7 +183,6 @@ void stm32_pm_context_save(const psci_power_state_t *state, const void *data, si
 	memcpy(&backup_data->standby_pwr_state, state, sizeof(psci_power_state_t));
 	backup_data->psci_suspend_mode = psci_suspend_mode;
 
-	fdt_get_address(&fdt);
 	backup_data->fdt_bl31 = (uintptr_t)fdt;
 
 	/* Copy other data in Backup SRAM */
