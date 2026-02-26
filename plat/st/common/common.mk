@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
+# Copyright (c) 2023-2026, STMicroelectronics - All Rights Reserved
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -192,7 +192,6 @@ PLAT_BL_COMMON_SOURCES		+=	drivers/clk/clk.c				\
 					drivers/st/nvmem/stm32mp_tamp_nvram_core.c	\
 					drivers/st/regulator/regulator_core.c		\
 					drivers/st/regulator/regulator_fixed.c		\
-					drivers/st/regulator/regulator_gpio.c			\
 					plat/st/common/stm32mp_dt.c				\
 					plat/st/common/stm32mp_fconf_fuse.c
 

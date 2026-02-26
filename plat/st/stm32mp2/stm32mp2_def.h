@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2023-2026, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -764,8 +764,6 @@ enum ddr_type {
 #define PLAT_NB_RDEVS				U(19)
 /* 2 FIXED */
 #define PLAT_NB_FIXED_REGUS			U(2)
-/* No GPIO regu */
-#define PLAT_NB_GPIO_REGUS			U(0)
 /* Number of low power modes defined in the device tree */
 #define PLAT_NB_SUSPEND_MODES		7
 /* TAMP BACKUP REGISTER */
