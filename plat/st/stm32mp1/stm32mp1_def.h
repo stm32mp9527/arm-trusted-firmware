@@ -134,9 +134,8 @@
 
 /* DDR configuration */
 #define STM32MP_DDR_BASE		U(0xC0000000)
-//#define STM32MP_DDR_MAX_SIZE		U(0x40000000)	/* Max 1GB */
-/*改的*/
-#define STM32MP_DDR_MAX_SIZE		U(0x10000000)	/* Max 1GB */
+#define STM32MP_DDR_MAX_SIZE		U(0x40000000)	/* Max 1GB */
+
 
 /* DDR power initializations */
 #ifndef __ASSEMBLER__
