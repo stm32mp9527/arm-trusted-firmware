@@ -12,6 +12,10 @@
 #error "DDR_SIZE is not defined"
 #endif
 
+/* 改的**/
+#define DDR_SIZE        0x10000000    /* 256MB total DDR */
+#define STM32MP_DDR_S_SIZE 0x02000000 /* 32MB allocated to OP-TEE secure */
+
 #define DDR_NS_BASE	STM32MP_DDR_BASE
 #define DDR_SEC_SIZE	STM32MP_DDR_S_SIZE
 #define DDR_SEC_BASE	(STM32MP_DDR_BASE + (DDR_SIZE - DDR_SEC_SIZE))
