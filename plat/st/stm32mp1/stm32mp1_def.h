@@ -134,7 +134,9 @@
 
 /* DDR configuration */
 #define STM32MP_DDR_BASE		U(0xC0000000)
-#define STM32MP_DDR_MAX_SIZE		U(0x40000000)	/* Max 1GB */
+//#define STM32MP_DDR_MAX_SIZE		U(0x40000000)	/* Max 1GB */
+/*改的*/
+#define STM32MP_DDR_MAX_SIZE		U(0x10000000)	/* Max 1GB */
 
 /* DDR power initializations */
 #ifndef __ASSEMBLER__
@@ -194,14 +196,20 @@ enum ddr_type {
   #define MAX_MMAP_REGIONS		7
  #endif
 #endif
-
-#if STM32MP13
-#define STM32MP_BL33_BASE		STM32MP_DDR_BASE
-#endif
-#if STM32MP15
-#define STM32MP_BL33_BASE		(STM32MP_DDR_BASE + U(0x100000))
-#endif
-#define STM32MP_BL33_MAX_SIZE		U(0x400000)
+/*改的地方*/
+// #if STM32MP13
+// #define STM32MP_BL33_BASE		STM32MP_DDR_BASE
+// #endif
+// #if STM32MP15
+// #define STM32MP_BL33_BASE		(STM32MP_DDR_BASE + U(0x100000))
+// #endif
+// #define STM32MP_BL33_MAX_SIZE		U(0x400000)
+/* DDR memory layout for 256MB RAM */
+/*我添加的从0x02000000开始	*/
+#define STM32MP_BL32_BASE       (STM32MP_DDR_BASE)
+#define STM32MP_BL32_SIZE       0x02000000  // 32MB for OP-TEE / BL32
+#define STM32MP_BL33_BASE       (STM32MP_DDR_BASE + STM32MP_BL32_SIZE)
+#define STM32MP_BL33_MAX_SIZE   (STM32MP_DDR_MAX_SIZE - STM32MP_BL32_SIZE)
 
 /* Define maximum page size for NAND devices */
 #define PLATFORM_MTD_MAX_PAGE_SIZE	U(0x1000)
