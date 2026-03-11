@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2022-2026, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -94,7 +94,7 @@ static bool is_fuse_shadowed(uint32_t otp)
 
 static void poll_otp_status_busy(void)
 {
-	int32_t timeout = BSEC_TIMEOUT_VALUE;
+	uint32_t timeout = BSEC_TIMEOUT_VALUE;
 
 	while (((bsec_get_status() & BSEC_OTPSR_BUSY) != 0U) && (timeout != 0U)) {
 		timeout--;
