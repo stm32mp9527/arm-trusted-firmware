@@ -84,6 +84,16 @@ PKA_USE_NIST_P256		:=	1
 PKA_USE_BRAINPOOL_P256T1	:=	1
 endif
 
+# Support of previous revision with workaround not upstreamable
+ifeq ($(STM32MP23),1)
+CONFIG_STM32MP23X_REVY		?=	1
+endif
+ifeq ($(STM32MP25),1)
+CONFIG_STM32MP25X_REVY		?=	1
+endif
+CONFIG_STM32MP23X_REVY		?=	0
+CONFIG_STM32MP25X_REVY		?=	0
+
 # STM32 image header version v2.2 or v2.3 for STM32MP21
 STM32_HEADER_VERSION_MAJOR	:=	2
 ifeq ($(STM32MP21),1)
@@ -212,6 +222,8 @@ endif
 $(eval $(call assert_booleans,\
 	$(sort \
 		ARM_LINUX_KERNEL_AS_BL33 \
+		CONFIG_STM32MP23X_REVY \
+		CONFIG_STM32MP25X_REVY \
 		PKA_USE_BRAINPOOL_P256T1 \
 		PKA_USE_NIST_P256 \
 		STM32MP_CRYPTO_ROM_LIB \
@@ -245,6 +257,8 @@ $(eval $(call assert_numerics,\
 $(eval $(call add_defines,\
 	$(sort \
 		ARM_LINUX_KERNEL_AS_BL33 \
+		CONFIG_STM32MP23X_REVY \
+		CONFIG_STM32MP25X_REVY \
 		DWL_BUFFER_BASE \
 		PKA_USE_BRAINPOOL_P256T1 \
 		PKA_USE_NIST_P256 \
