@@ -310,4 +310,4 @@
 	pinctrl-0 = <&usart1_pins_a>;
 	uart-has-rtscts;
 	status = "disabled";
-}; 
+};  
