@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022, STMicroelectronics - All Rights Reserved
+ * Copyright (c) 2016-2026, STMicroelectronics - All Rights Reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -284,7 +284,7 @@ static void set_gpio(uint32_t bank, uint32_t pin, uint32_t mode, uint32_t type,
 
 	clk_disable(clock);
 
-#ifdef STM32MP1X
+#if STM32MP1X
 	if (status == DT_SECURE) {
 		stm32mp_register_secure_gpio(bank, pin);
 #if !IMAGE_BL2
