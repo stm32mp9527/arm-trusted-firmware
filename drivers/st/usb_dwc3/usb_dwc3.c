@@ -1525,6 +1525,7 @@ static uint8_t dwc3_read_dev_evt_type(uint32_t event)
 	return ret;
 }
 
+#if (USB_DWC3_NUM_IN_EP > 1) || (USB_DWC3_NUM_OUT_EP > 1)
 static enum usb_status dwc3_ep_clear_stall(const dwc3_handle_t *dwc3_handle,
 					   const usb_dwc3_endpoint_t *dwc3_ep)
 {
@@ -1535,6 +1536,7 @@ static enum usb_status dwc3_ep_clear_stall(const dwc3_handle_t *dwc3_handle,
 	return dwc3_execute_dep_cmd(dwc3_handle, dwc3_ep->phy_epnum, USB_DWC3_DEPCMD_CLEARSTALL,
 				    &params);
 }
+#endif /* (USB_DWC3_NUM_IN_EP > 1) || (USB_DWC3_NUM_OUT_EP > 1) */
 
 static uint8_t dwc3_get_dev_speed(const dwc3_handle_t *dwc3_handle)
 {
@@ -1675,7 +1677,6 @@ static enum usb_action dwc3_handle_dev_event(dwc3_handle_t *dwc3_handle, uint32_
 	enum usb_action action = USB_NOTHING;
 	uint8_t type = dwc3_read_dev_evt_type(event);
 	uint8_t i, speed;
-	usb_dwc3_endpoint_t *ep;
 	enum usb_status ret;
 	uint32_t ep0_mps = USB3_MAX_PACKET_SIZE;
 
@@ -1716,15 +1717,18 @@ static enum usb_action dwc3_handle_dev_event(dwc3_handle_t *dwc3_handle, uint32_
 					      &dwc3_handle->pcd_handle->in_ep[i]);
 		}
 
+#if USB_DWC3_NUM_OUT_EP > 1
 		/* Stop transfers for all EP except EP0OUT k = USB_DWC3_NUM_OUT_EP */
 		for (i = 1; i < USB_DWC3_NUM_OUT_EP; i++) {
 			dwc3_ep_stop_xfer(dwc3_handle,
 					      &dwc3_handle->pcd_handle->out_ep[i]);
 		}
+#endif
 
+#if USB_DWC3_NUM_IN_EP > 1
 		/* Clear Stall for all EP except EP0IN k = USB_DWC3_NUM_IN_EP */
 		for (i = 1; i < USB_DWC3_NUM_IN_EP; i++) {
-			ep = &dwc3_handle->IN_ep[i];
+			usb_dwc3_endpoint_t *ep = &dwc3_handle->IN_ep[i];
 
 			if (!ep->is_stall) {
 				continue;
@@ -1738,10 +1742,12 @@ static enum usb_action dwc3_handle_dev_event(dwc3_handle_t *dwc3_handle, uint32_
 				return action;
 			}
 		}
+#endif
 
+#if USB_DWC3_NUM_OUT_EP > 1
 		/* Clear Stall for all EP except EP0OUT k = USB_DWC3_NUM_OUT_EP */
 		for (i = 1; i < USB_DWC3_NUM_OUT_EP; i++) {
-			ep = &dwc3_handle->OUT_ep[i];
+			usb_dwc3_endpoint_t *ep = &dwc3_handle->OUT_ep[i];
 
 			if (!ep->is_stall) {
 				continue;
@@ -1757,6 +1763,7 @@ static enum usb_action dwc3_handle_dev_event(dwc3_handle_t *dwc3_handle, uint32_
 				return action;
 			}
 		}
+#endif
 
 		/* Reset device address to zero */
 		ret = usb_dwc3_set_address(dwc3_handle, 0);
