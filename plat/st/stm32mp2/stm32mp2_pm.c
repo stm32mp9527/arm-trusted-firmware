@@ -1212,6 +1212,9 @@ static void __dead2 stm32_system_off(void)
 	INFO("BL31: power off\n");
 	console_flush();
 
+	stm32_set_scmi_sys_pwr(SCMI_SYS_PWR_SHUTDOWN);
+
+	/* Isolate CA35SS: stop the ARM generic timer based on STGEN */
 	stm32mp_ca35_lpi_isolate();
 
 	psci_pwrdown_cpu(PLAT_MAX_PWR_LVL);
