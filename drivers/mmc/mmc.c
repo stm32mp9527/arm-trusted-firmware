@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
+#include <drivers/delay_timer.h>
 
 #include <arch_helpers.h>
 #include <common/debug.h>
@@ -82,18 +83,18 @@ static int mmc_send_cmd(unsigned int idx, unsigned int arg,
 
 static int mmc_device_state(void)
 {
-	int retries = MMC_DEFAULT_MAX_RETRIES;
+	int retries = MMC_DEFAULT_MAX_RETRIES*10;
 	unsigned int resp_data[4] = {0};
 
 	do {
 		int ret;
 
 		if (retries == 0) {
-			ERROR("CMD13 failed after %d retries\n",
-			      MMC_DEFAULT_MAX_RETRIES);
+			ERROR("CMD13 failed after %d retries.\n",
+			      MMC_DEFAULT_MAX_RETRIES*10);
 			return -EIO;
-		}
-
+		}		
+		mdelay(500);
 		ret = mmc_send_cmd(MMC_CMD(13), rca << RCA_SHIFT_OFFSET,
 				   MMC_RESPONSE_R1, &resp_data[0]);
 		if (ret != 0) {

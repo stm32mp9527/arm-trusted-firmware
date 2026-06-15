@@ -14,6 +14,7 @@
 #include <common/debug.h>
 #include <common/desc_image_load.h>
 #include <drivers/auth/auth_mod.h>
+#include <drivers/delay_timer.h>
 #include <plat/common/platform.h>
 
 #include <platform_def.h>
@@ -60,6 +61,8 @@ struct entry_point_info *bl2_load_images(void)
 		err = bl2_plat_handle_pre_image_load(bl2_node_info->image_id);
 		if (err != 0) {
 			ERROR("BL2: Failure in pre image load handling (%i)\n", err);
+			console_flush();
+			mdelay(200);
 			plat_error_handler(err);
 		}
 
