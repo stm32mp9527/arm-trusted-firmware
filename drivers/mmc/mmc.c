@@ -83,7 +83,7 @@ static int mmc_send_cmd(unsigned int idx, unsigned int arg,
 
 static int mmc_device_state(void)
 {
-	int retries = MMC_DEFAULT_MAX_RETRIES*10;
+	int retries = MMC_DEFAULT_MAX_RETRIES;
 	unsigned int resp_data[4] = {0};
 
 	do {
@@ -91,10 +91,10 @@ static int mmc_device_state(void)
 
 		if (retries == 0) {
 			ERROR("CMD13 failed after %d retries.\n",
-			      MMC_DEFAULT_MAX_RETRIES*10);
+			      MMC_DEFAULT_MAX_RETRIES);
 			return -EIO;
 		}		
-		mdelay(500);
+		mdelay(200);
 		ret = mmc_send_cmd(MMC_CMD(13), rca << RCA_SHIFT_OFFSET,
 				   MMC_RESPONSE_R1, &resp_data[0]);
 		if (ret != 0) {
