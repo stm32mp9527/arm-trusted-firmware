@@ -117,6 +117,8 @@
 		CLK_UART2_HSI
 		CLK_UART4_HSI
 		CLK_SAES_AXI
+		CLK_ETH1_PLL4P
+		CLK_ETH2_PLL4P
 	>;
 
 	st,clkdiv = <
