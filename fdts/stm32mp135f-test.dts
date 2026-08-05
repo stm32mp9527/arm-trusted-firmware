@@ -117,8 +117,8 @@
 		CLK_UART2_HSI
 		CLK_UART4_HSI
 		CLK_SAES_AXI
-		CLK_ETH1_PLL4P
-		CLK_ETH2_PLL4P
+		CLK_ETH1_PLL3Q
+		CLK_ETH2_PLL3Q
 	>;
 
 	st,clkdiv = <
@@ -139,15 +139,15 @@
 			frac = <0x1400>;
 		};
 
-		pll3_vco_417Mhz: pll3-vco-417Mhz {
+		pll3_vco_625Mhz: pll3-vco-625Mhz {
 			src = <CLK_PLL3_HSE>;
-			divmn = <1 33>;
-			frac = <0x1a04>;
+			divmn = <2 77>;
+			frac = <0x400>;
 		};
 
-		pll4_vco_500Mhz: pll4-vco-500Mhz {
+		pll4_vco_594Mhz: pll4-vco-594Mhz {
 			src = <CLK_PLL4_HSE>;
-			divmn = <5 124>;
+			divmn = <3 98>;
 		};
 	};
 
@@ -164,7 +164,7 @@
 		};
 	};
 
-	/* VCO = 417.8 MHz => P = 209, Q = 24, R = 209 */
+	/* VCO = 625.0 MHz => P = 208.3 (MLAHBS), Q = 125 (ETH1/ETH2), R = 31.25 */
 	pll3:st,pll@2 {
 		compatible = "st,stm32mp1-pll";
 		reg = <2>;
@@ -172,12 +172,12 @@
 		st,pll = <&pll3_cfg1>;
 
 		pll3_cfg1: pll3_cfg1 {
-			st,pll_vco = <&pll3_vco_417Mhz>;
-			st,pll_div_pqr = <1 16 1>;
+			st,pll_vco = <&pll3_vco_625Mhz>;
+			st,pll_div_pqr = <2 4 19>;
 		};
 	};
 
-	/* VCO = 500.0 MHz => P = 125 (ETH/SDMMC), Q = 50 (LTDC), R = 50 (RNG1) */
+	/* VCO = 594.0 MHz => P = 99 (SDMMC), Q = 49.5 (LTDC), R = 45.7 (RNG1) */
 	pll4:st,pll@3 {
 		compatible = "st,stm32mp1-pll";
 		reg = <3>;
@@ -185,8 +185,8 @@
 		st,pll = <&pll4_cfg1>;
 
 		pll4_cfg1: pll4_cfg1 {
-			st,pll_vco = <&pll4_vco_500Mhz>;
-			st,pll_div_pqr = <3 9 9>;
+			st,pll_vco = <&pll4_vco_594Mhz>;
+			st,pll_div_pqr = <5 11 12>;
 		};
 	};
 };
